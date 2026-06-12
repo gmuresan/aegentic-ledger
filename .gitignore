@@ -1,0 +1,25 @@
+# OS / editor noise only — this repo holds ONLY generated, redaction-gated public artifacts.
+# Never commit secrets, keys, .env files, or the local overseer DB here.
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Editors
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Misc
+Thumbs.db
+*.log
+
+# Defensive: never let an env/key file in even by accident
+.env
+.env.*
+*.key
+*.pem
