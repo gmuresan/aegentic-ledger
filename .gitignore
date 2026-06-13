@@ -18,6 +18,11 @@
 Thumbs.db
 *.log
 
+# Tooling artifacts (preview/deploy via npx — repo itself stays install-free)
+node_modules/
+.wrangler/
+.DS_Store
+
 # Defensive: never let an env/key file in even by accident
 .env
 .env.*
