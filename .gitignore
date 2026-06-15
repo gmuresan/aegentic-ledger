@@ -18,7 +18,10 @@
 Thumbs.db
 *.log
 
-# Tooling artifacts (preview/deploy via npx — repo itself stays install-free)
+# Build output (Cloudflare Pages rebuilds it; never commit)
+dist/
+
+# Tooling artifacts
 node_modules/
 .wrangler/
 .DS_Store
