@@ -1,0 +1,80 @@
+---
+// LatestEntriesSection (Story 72.2, AC1 §4 / AC3) — most-recent entries from both streams,
+// interleaved newest-first by date so the two-stream model is legible on the landing itself.
+// Each item is an EntryCard with its stream-badge. Carries the same "as of {publish date}"
+// freshness stamp as §3 ("latest" means latest-as-of-publish, not a live feed).
+import EntryCard from './EntryCard.astro';
+import type { StreamEntryRef } from '../lib/state-types';
+
+interface Props {
+  latestByStream: { agent: StreamEntryRef[]; build: StreamEntryRef[] };
+  generatedAt: string;
+}
+const { latestByStream, generatedAt } = Astro.props;
+
+// Interleave both streams and sort newest-first by date. Ties fall back to slug descending
+// (matches the archive + feed comparator so same-date entries order consistently everywhere).
+const entries: StreamEntryRef[] = [...latestByStream.agent, ...latestByStream.build].sort(
+  (a, b) => {
+    const byDate = b.date.localeCompare(a.date);
+    return byDate !== 0 ? byDate : b.slug.localeCompare(a.slug);
+  },
+);
+
+// UTC so the freshness date is deterministic across build environments (matches §metric strip).
+const asOf = new Date(generatedAt).toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+---
+
+<section class="latest-entries" aria-label="Latest from both streams">
+  <h2 class="section-title">Latest from both streams</h2>
+  <p class="freshness mono">as of {asOf}</p>
+  {
+    entries.length > 0 ? (
+      <div class="cards">
+        {entries.map((entry) => (
+          <EntryCard
+            title={entry.title}
+            date={entry.date}
+            stream={entry.stream}
+            slug={entry.slug}
+          />
+        ))}
+      </div>
+    ) : (
+      <p class="empty">No entries published yet.</p>
+    )
+  }
+</section>
+
+<style>
+  .latest-entries {
+    margin: var(--section-gap-mobile) 0 0;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--headline-size);
+    font-weight: 500;
+    color: var(--ink-primary);
+    margin: 0;
+  }
+
+  .freshness {
+    font-family: var(--font-mono);
+    font-size: var(--mono-sm-size);
+    color: var(--ink-muted);
+    margin: var(--stack-tight) 0 var(--stack);
+  }
+
+  .empty {
+    font-family: var(--font-body);
+    font-size: var(--body-size);
+    color: var(--ink-secondary);
+    margin: 0;
+  }
+</style>

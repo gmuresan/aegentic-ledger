@@ -1,0 +1,81 @@
+---
+// SafetyLayerSection (Story 72.2, AC1 §3 / AC3) — the proof-not-claim centerpiece.
+// Renders 2–4 real recent interceptions from the state.json aggregate as
+// interception-callouts, each linking to its full entry (when the slug is known), under an
+// "as of {publish date}" freshness stamp.
+//
+// Honesty fallback (AC1 §3): if `interceptions` is empty (zero interceptions yet), the section
+// heading changes to "Every decision, on the record" and the body invites the reader to the
+// ledger — it NEVER invents a catch.
+import InterceptionCallout from './InterceptionCallout.astro';
+import type { InterceptionItem } from '../lib/state-types';
+
+interface Props {
+  interceptions: InterceptionItem[];
+  generatedAt: string;
+}
+const { interceptions, generatedAt } = Astro.props;
+const hasInterceptions = interceptions.length > 0;
+const heading = hasInterceptions
+  ? 'The safety layer, on the record'
+  : 'Every decision, on the record';
+// UTC so the freshness date is deterministic across build environments (matches §metric strip).
+const asOf = new Date(generatedAt).toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+---
+
+<section class="safety-layer" aria-label={heading}>
+  <h2 class="section-title">{heading}</h2>
+  <p class="freshness mono">as of {asOf}</p>
+  {
+    hasInterceptions ? (
+      <div class="callouts">
+        {interceptions.map((item) => (
+          <InterceptionCallout
+            policyLabel={item.policyLabel}
+            intentSummary={item.intentSummary}
+            entrySlug={item.entrySlug}
+          />
+        ))}
+      </div>
+    ) : (
+      <p class="empty">
+        Every action the agent has proposed is on the public record. Read the ledger to see each
+        decision and its on-chain receipt.
+      </p>
+    )
+  }
+</section>
+
+<style>
+  .safety-layer {
+    margin: var(--section-gap-mobile) 0 0;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--headline-size);
+    font-weight: 500;
+    color: var(--ink-primary);
+    margin: 0;
+  }
+
+  .freshness {
+    font-family: var(--font-mono);
+    font-size: var(--mono-sm-size);
+    color: var(--ink-muted);
+    margin: var(--stack-tight) 0 var(--stack);
+  }
+
+  .empty {
+    font-family: var(--font-body);
+    font-size: var(--body-size);
+    color: var(--ink-secondary);
+    max-width: var(--reading-measure);
+    margin: 0;
+  }
+</style>

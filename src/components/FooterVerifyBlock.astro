@@ -1,0 +1,80 @@
+---
+// FooterVerifyBlock (Story 72.1, AC3) — the trust anchor. Shows the public wallet
+// address (full, copyable, mono) with an explorer link, plus the honest
+// "what this is / what this isn't" disclosure.
+//
+// Microcopy rule (DESIGN.md do/don't): say "self-custodied by the operator" —
+// never "trustless" or "non-custodial" for the overseer.
+interface Props {
+  wallet?: string;
+  explorerUrl?: string;
+  explorerName?: string;
+}
+const { wallet, explorerUrl, explorerName } = Astro.props;
+const linkLabel = explorerName ? `↗ ${explorerName}` : '↗ view on the block explorer';
+---
+
+<footer class="footer-verify">
+  <p class="label">VERIFY ON CHAIN</p>
+  {
+    wallet ? (
+      <p class="wallet">
+        <span class="address mono">{wallet}</span>
+        {explorerUrl && (
+          <a class="explorer" href={explorerUrl} rel="noopener noreferrer" target="_blank">
+            {linkLabel}
+          </a>
+        )}
+      </p>
+    ) : (
+      <p class="wallet"><span class="address mono">(wallet published with the first entry)</span></p>
+    )
+  }
+  <p class="disclosure">
+    This is a self-custodied record: the operator holds the keys and publishes what the
+    supervised agent did, with on-chain receipts you can check yourself. It is not a promise
+    of any outcome.
+  </p>
+</footer>
+
+<style>
+  .footer-verify {
+    background: var(--surface-sunken);
+    border-top: 1px solid var(--hairline-strong);
+    margin-top: var(--section-gap-mobile);
+    padding: var(--stack) var(--margin-mobile);
+  }
+
+  .label {
+    font-family: var(--font-body);
+    font-size: var(--label-caps-size);
+    font-weight: var(--label-caps-weight);
+    letter-spacing: var(--label-caps-ls);
+    color: var(--ink-muted);
+    margin: 0 0 var(--stack-tight);
+  }
+
+  .wallet {
+    margin: 0 0 var(--stack);
+  }
+
+  .address {
+    font-family: var(--font-mono);
+    font-size: var(--mono-data-size);
+    color: var(--ink-secondary);
+    user-select: all;
+  }
+
+  .explorer {
+    color: var(--info);
+    margin-left: var(--stack);
+  }
+
+  .disclosure {
+    font-family: var(--font-body);
+    font-size: var(--body-sm-size);
+    color: var(--ink-muted);
+    max-width: var(--reading-measure);
+    margin: 0;
+  }
+</style>

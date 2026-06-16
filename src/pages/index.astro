@@ -1,0 +1,186 @@
+---
+// Marketing landing (Story 72.2) — the full 5-section landing IA from EXPERIENCE.md, replacing
+// the 72.1 holding stub. It is both a pitch and a proof: static Gm-owned copy persuades, while
+// the live-state widgets beneath it (from src/data/state.json, the pre-built aggregate) make
+// every figure checkable.
+//
+// G7 build-time isolation: the widget data is a STATIC import of state.json resolved at build
+// time — this page never makes a runtime HTTP call. The generator (scripts/generate-homepage-
+// state.ts) refreshes state.json locally before each publish.
+//
+// The hero headline + subhead are VERBATIM from the spec and must not be paraphrased (AC1).
+// The §2 step copy and §5 disclosure are Gm-owned static text (no banned terms — G2).
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MetricStrip from '../components/MetricStrip.astro';
+import HowItWorksSection from '../components/HowItWorksSection.astro';
+import SafetyLayerSection from '../components/SafetyLayerSection.astro';
+import LatestEntriesSection from '../components/LatestEntriesSection.astro';
+import state from '../data/state.json';
+import type { HomepageState } from '../lib/state-types';
+
+// state.json is the build-shape contract #3 aggregate; type it for the widgets (G1/G7).
+const s = state as HomepageState;
+
+// The agent's public wallet, surfaced in the footer verify block (already public on-chain).
+const WALLET = '0x326e18Ade6Edc700F765F0906B5C5f05FF51F753';
+const EXPLORER_URL = `https://basescan.org/address/${WALLET}`;
+const EXPLORER_NAME = 'view on basescan';
+---
+
+<BaseLayout
+  title="Aegentic Ledger"
+  wallet={WALLET}
+  explorerUrl={EXPLORER_URL}
+  explorerName={EXPLORER_NAME}
+>
+  {/* ── §1 Hero ───────────────────────────────────────────────────────── */}
+  <section class="hero">
+    <p class="eyebrow">AEGENTIC LEDGER</p>
+    <h1>Know exactly what an AI does with real money — before you trust one with yours.</h1>
+    <p class="lede">
+      An autonomous agent runs live capital on-chain under a supervised safety layer. Every
+      action it takes, and every move the rail blocks, is on the public record.
+    </p>
+
+    <MetricStrip
+      cyclesSupervised={s.cyclesSupervised}
+      selfCustodiedCapital={s.selfCustodiedCapital}
+      movesBlocked={s.movesBlocked}
+      drained={s.drained}
+      generatedAt={s.generatedAt}
+    />
+
+    <p class="cta">
+      <a class="cta-button primary" href="/ledger">READ THE LEDGER</a>
+      <a class="cta-button secondary" href="/feed.xml">RSS</a>
+    </p>
+  </section>
+
+  {/* ── §2 How it works ───────────────────────────────────────────────── */}
+  <HowItWorksSection />
+
+  {/* ── §3 The safety layer, on the record ────────────────────────────── */}
+  <SafetyLayerSection interceptions={s.latestInterceptions} generatedAt={s.generatedAt} />
+
+  {/* ── §4 Latest from both streams ───────────────────────────────────── */}
+  <LatestEntriesSection latestByStream={s.latestByStream} generatedAt={s.generatedAt} />
+
+  {/* ── §5 What this is / isn't (the two required disclaimers) ─────────── */}
+  <section class="disclosure" aria-label="What this is and isn't">
+    <h2 class="section-title">What this is — and what it isn’t</h2>
+    <p class="body">
+      What this is: a public record of one agent’s decisions and what the safety layer did, with
+      on-chain receipts you can check yourself. What this isn’t: investment advice, a product you
+      can buy, or a promise of returns.
+    </p>
+    <p class="body">
+      The record shows every interception the safety layer made — not that it catches everything.
+      The zero-drained count is historical to the date shown; it is not a guarantee of future
+      outcomes.
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    max-width: var(--entry-max);
+    margin: var(--section-gap-mobile) auto 0;
+  }
+
+  .eyebrow {
+    font-family: var(--font-body);
+    font-size: var(--label-caps-size);
+    font-weight: var(--label-caps-weight);
+    letter-spacing: var(--label-caps-ls);
+    color: var(--brand);
+    margin: 0 0 var(--stack);
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: var(--display-xl-size);
+    font-weight: var(--display-xl-weight);
+    line-height: var(--display-xl-lh);
+    letter-spacing: var(--display-xl-ls);
+    margin: 0;
+  }
+
+  .lede {
+    font-family: var(--font-body);
+    font-size: var(--body-lg-size);
+    line-height: var(--body-lg-lh);
+    color: var(--ink-secondary);
+    max-width: var(--reading-measure);
+    margin: var(--stack) 0 0;
+  }
+
+  .cta {
+    margin-top: var(--section-gap-mobile);
+    display: flex;
+    gap: var(--stack);
+    align-items: center;
+  }
+
+  .cta-button {
+    display: inline-block;
+    border-radius: var(--radius);
+    padding: 12px 20px;
+    font-family: var(--font-body);
+    font-size: var(--label-caps-size);
+    font-weight: var(--label-caps-weight);
+    letter-spacing: var(--label-caps-ls);
+    text-decoration: none;
+  }
+
+  .cta-button.primary {
+    background: var(--brand);
+    color: var(--ink-on-accent);
+  }
+
+  .cta-button.secondary {
+    background: transparent;
+    color: var(--ink-secondary);
+    border: 1px solid var(--hairline-strong);
+  }
+
+  .cta-button:hover {
+    text-decoration: none;
+  }
+
+  .disclosure {
+    margin: var(--section-gap-mobile) 0 0;
+    max-width: var(--reading-measure);
+  }
+
+  .disclosure .section-title {
+    font-family: var(--font-display);
+    font-size: var(--headline-size);
+    font-weight: 500;
+    color: var(--ink-primary);
+    margin: 0 0 var(--stack);
+  }
+
+  .disclosure .body {
+    font-family: var(--font-body);
+    font-size: var(--body-sm-size);
+    line-height: var(--body-lh);
+    color: var(--ink-muted);
+    margin: 0 0 var(--stack);
+  }
+
+  /* ── Responsive (Story 72.3, AC5) — the 56px display headline must not overflow. ── */
+  @media (max-width: 768px) {
+    .hero h1 {
+      font-size: clamp(2rem, 7vw, var(--display-xl-size));
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero h1 {
+      font-size: clamp(1.6rem, 8vw, 2.25rem);
+    }
+    .cta {
+      flex-wrap: wrap;
+    }
+  }
+</style>

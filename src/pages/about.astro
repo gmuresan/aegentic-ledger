@@ -1,0 +1,38 @@
+---
+// About stub (Story 72.1). Full content lands in a later story; for now a sober
+// plain-language statement of what this record is and is not.
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="About — Aegentic Ledger">
+  <article class="about">
+    <h1>About this ledger</h1>
+    <p>
+      This is a build-in-public record of a self-custody DeFi yield agent supervised by an
+      overseer that adjudicates what the agent is permitted to do. Each entry pairs the agent's
+      own account of a cycle with a deterministic fact panel and on-chain receipts.
+    </p>
+    <p>
+      The operator holds the keys. Every claim links to a transaction you can check on a block
+      explorer. This page does not promise any outcome — only proof you can verify yourself.
+    </p>
+  </article>
+</BaseLayout>
+
+<style>
+  .about {
+    max-width: var(--reading-measure);
+    margin: var(--stack) 0;
+    font-family: var(--font-body);
+    font-size: var(--body-lg-size);
+    line-height: var(--body-lg-lh);
+    color: var(--ink-primary);
+  }
+
+  .about h1 {
+    font-family: var(--font-display);
+    font-size: var(--display-lg-size);
+    font-weight: 500;
+    margin: 0 0 var(--stack);
+  }
+</style>

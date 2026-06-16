@@ -1,0 +1,149 @@
+/*
+ * Aegentic Ledger design tokens (Story 72.1, AC3).
+ *
+ * Full token spec:
+ *   _bmad-output/planning-artifacts/ux-designs/ux-crypto-agent-observability-2026-06-15/DESIGN.md
+ *
+ * Dark-primary only — no prefers-color-scheme branching yet (light-mode stubs are
+ * carried in DESIGN.md but deliberately not implemented here).
+ *
+ * WCAG 2.2 AA: contrast audit completed in Story 72.3. Every text token was checked
+ * against its background (≥ 4.5:1 normal text). All spec pairs passed as-authored
+ * (brass --brand on base = 8.0:1, amber --caution on caution-wash = 8.2:1, --intercept
+ * on intercept-wash = 4.7:1, --stream-build on base = 6.5:1, --ink-secondary = 7.8:1).
+ * Only --ink-muted failed (3.53:1) where it backs body-sm disclosure text, and was
+ * lightened to the minimum passing value (see the token below).
+ */
+
+:root {
+  /* ── Surface ramp (cool near-black; never pure black) ── */
+  --surface-base: #0b0e14;       /* page background — deepest */
+  --surface-raised: #111620;     /* cards, sections lifted off base */
+  --surface-overlay: #161c28;    /* popovers, sticky bars, hover-lifted cards */
+  --surface-sunken: #080a0f;     /* the fact-panel well (recessed from prose) */
+  --surface-ledger: #0d1118;     /* receipt-row strip (the monospace zone) */
+  --hairline: #1e2633;           /* 1px structural rule, ghost border */
+  --hairline-strong: #2a3342;    /* divider that must be seen (fact-wall edge) */
+
+  /* ── Ink ── */
+  --ink-primary: #e8ecf2;        /* primary reading text on dark */
+  --ink-secondary: #9aa6b8;      /* captions, metadata, deemphasized prose */
+  --ink-muted: #707d92;          /* timestamps, labels, "less than" data; was #5e6a7d, lightened for WCAG 2.2 AA (3.53:1 → 4.63:1 on --surface-base) */
+  --ink-on-accent: #0b0e14;      /* text on a filled accent (verdict/CTA) */
+
+  /* ── Brand: the seal (rationed; authority/CTA/agent-stream only) ── */
+  --brand: #c8a24b;
+  --brand-dim: #8a6f33;
+  --brand-wash: #1a160c;
+
+  /* ── Verdict palette (color carries meaning, never mood) ── */
+  --intercept: #e5484d;          /* THE star color — "the rail caught it" */
+  --intercept-wash: #1f1012;
+  --intercept-edge: #5b2326;
+  --caution: #e8a23d;            /* critic flag / oscillation / projected-vs-realized miss */
+  --caution-wash: #1e1709;
+  --caution-edge: #5a4316;
+  --proceed: #3dba82;            /* executed / approved / confirmed (deliberately quiet) */
+  --proceed-wash: #0c1a14;
+  --proceed-edge: #1c5240;
+  --info: #4a8fe7;               /* explorer links, verify affordances */
+  --info-wash: #0c141f;
+
+  /* ── Stream identity ── */
+  --stream-agent: #c8a24b;       /* Agent Ledger == brand brass */
+  --stream-build: #7a8cff;       /* Build Log == periwinkle (never a verdict) */
+  --stream-build-wash: #10131f;
+
+  /* ── Typography families ── */
+  --font-display: 'Newsreader', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+
+  /* ── Type scale (size / weight / line-height / tracking) ── */
+  --display-xl-size: 56px;
+  --display-xl-weight: 500;
+  --display-xl-lh: 1.06;
+  --display-xl-ls: -0.02em;
+  --display-lg-size: 36px;
+  --headline-size: 28px;
+  --headline-sm-size: 20px;
+  --body-lg-size: 18px;
+  --body-lg-lh: 1.62;
+  --body-size: 16px;
+  --body-lh: 1.6;
+  --body-sm-size: 14px;
+  --label-caps-size: 12px;
+  --label-caps-weight: 600;
+  --label-caps-ls: 0.12em;
+  --mono-data-size: 14px;
+  --mono-data-weight: 500;
+  --mono-data-lg-size: 32px;
+  --mono-data-lg-weight: 600;
+  --mono-sm-size: 12.5px;
+
+  /* ── Radius ── */
+  --radius-sm: 3px;              /* tags, badges, inline chips */
+  --radius: 6px;                 /* buttons, receipt rows, inputs */
+  --radius-md: 8px;              /* cards, callouts, fact panel */
+  --radius-lg: 12px;             /* large containers, hero metric strip */
+
+  /* ── Spacing ── */
+  --space-unit: 4px;
+  --gutter: 24px;
+  --margin-mobile: 20px;
+  --margin-desktop: 80px;
+  --section-gap: 96px;
+  --section-gap-mobile: 64px;
+  --stack: 16px;
+  --stack-tight: 8px;
+  --fact-wall-gap: 28px;         /* the deliberate wall gap — never collapse */
+  --reading-measure: 68ch;
+  --content-max: 1200px;
+  --entry-max: 760px;
+}
+
+/* ── Base element styling ── */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--surface-base);
+  color: var(--ink-primary);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--body-size);
+  line-height: var(--body-lh);
+  background: var(--surface-base);
+  color: var(--ink-primary);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  color: var(--ink-primary);
+  margin: 0;
+}
+
+a {
+  color: var(--info);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* On-chain / deterministic data is ALWAYS mono (the receipt voice). */
+code,
+.mono,
+.mono-data {
+  font-family: var(--font-mono);
+}

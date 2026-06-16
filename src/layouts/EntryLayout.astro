@@ -1,0 +1,127 @@
+---
+// EntryLayout (Story 72.1, AC3) — per-entry shell. Uses BaseLayout, constrains the
+// reading column to entry-max (760px), and ENFORCES the fixed layout order:
+//
+//   stream-badge + <h1> title + date meta
+//   → above-fold callouts (slot "callouts")
+//   → editorial prose (slot "prose")
+//   → fact-wall separator (the deliberate gap + hairline-strong rule + surface drop)
+//   → <section class="fact-panel"> (slot "fact")
+//   → receipts (slot "receipts")
+//
+// The fact-wall is a visual separator (role="separator", aria-hidden) — the fact
+// zone itself is the labeled landmark, supplied via the FactPanel component in the
+// "fact" slot (build-shape contract #6). This split is structural and build-time;
+// no client JS.
+import BaseLayout from './BaseLayout.astro';
+import StreamBadge from '../components/StreamBadge.astro';
+
+interface Props {
+  title: string;
+  date: string;
+  stream: 'agent-ledger' | 'build-log';
+  wallet?: string;
+  explorerUrl?: string;
+  explorerName?: string;
+}
+const { title, date, stream, wallet, explorerUrl, explorerName } = Astro.props;
+const displayDate = date.includes('T') ? date.slice(0, date.indexOf('T')) : date;
+---
+
+<BaseLayout
+  title={title}
+  wallet={wallet}
+  explorerUrl={explorerUrl}
+  explorerName={explorerName}
+>
+  <article class="entry">
+    <header class="entry-head">
+      <StreamBadge stream={stream} />
+      <h1 class="entry-title">{title}</h1>
+      <p class="entry-date mono">{displayDate}</p>
+    </header>
+
+    <div class="callouts">
+      <slot name="callouts" />
+    </div>
+
+    <div class="prose-zone">
+      <slot name="prose" />
+    </div>
+
+    <hr class="fact-wall" role="separator" aria-hidden="true" />
+
+    <div class="fact-zone">
+      <slot name="fact" />
+    </div>
+
+    <div class="receipts">
+      <slot name="receipts" />
+    </div>
+  </article>
+
+  <style>
+    .entry {
+      max-width: var(--entry-max);
+      margin: 0 auto;
+    }
+
+    .entry-head {
+      display: flex;
+      flex-direction: column;
+      gap: var(--stack-tight);
+      margin-bottom: var(--stack);
+    }
+
+    .entry-title {
+      font-family: var(--font-display);
+      font-size: var(--headline-size);
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--ink-primary);
+      margin: var(--stack-tight) 0 0;
+    }
+
+    .entry-date {
+      font-family: var(--font-mono);
+      font-size: var(--mono-data-size);
+      color: var(--ink-muted);
+      margin: 0;
+    }
+
+    /* Editorial prose: capped at the reading measure, set in body sans. */
+    .prose-zone {
+      max-width: var(--reading-measure);
+      font-family: var(--font-body);
+      font-size: var(--body-lg-size);
+      line-height: var(--body-lg-lh);
+      color: var(--ink-primary);
+    }
+
+    .prose-zone :global(h2),
+    .prose-zone :global(h3) {
+      font-family: var(--font-display);
+    }
+
+    /* The fact-wall: the deliberate gap + a must-see rule + the surface drop below. */
+    .fact-wall {
+      border: none;
+      border-top: 1px solid var(--hairline-strong);
+      margin: var(--fact-wall-gap) 0 var(--fact-wall-gap);
+    }
+
+    .receipts {
+      margin-top: var(--stack);
+    }
+
+    /* ── Responsive (Story 72.3, AC5) — reading column full-width on mobile. ── */
+    @media (max-width: 480px) {
+      .prose-zone {
+        max-width: 100%;
+      }
+      .entry-title {
+        font-size: var(--headline-sm-size);
+      }
+    }
+  </style>
+</BaseLayout>

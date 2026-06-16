@@ -1,0 +1,57 @@
+---
+// FactPanel (Story 72.1, AC3) — the deterministic evidence zone. A recessed
+// surface-sunken well with a hairline-strong border (the wall edge). It is a
+// SEMANTIC LANDMARK: <section aria-label="The record"> (build-shape contract #6).
+//
+// Renders the deterministic markdown body (the half below the `---` wall) in
+// mono styling. This panel never contains a sentence of prose — only labeled,
+// machine-rendered facts.
+interface Props {
+  /** Pre-rendered HTML for the fact half of the entry body. */
+  html: string;
+}
+const { html } = Astro.props;
+---
+
+<section class="fact-panel" aria-label="The record">
+  <p class="header">THE RECORD</p>
+  <div class="fact-body mono" set:html={html} />
+</section>
+
+<style>
+  .fact-panel {
+    background: var(--surface-sunken);
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--radius-md);
+    padding: var(--stack);
+    box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.4);
+  }
+
+  .header {
+    font-family: var(--font-body);
+    font-size: var(--label-caps-size);
+    font-weight: var(--label-caps-weight);
+    letter-spacing: var(--label-caps-ls);
+    color: var(--ink-muted);
+    margin: 0 0 var(--stack);
+  }
+
+  .fact-body {
+    font-family: var(--font-mono);
+    font-size: var(--mono-data-size);
+    font-weight: var(--mono-data-weight);
+    line-height: 1.45;
+    color: var(--ink-primary);
+  }
+
+  /* Fact rows are separated by ghost hairlines. */
+  .fact-body :global(hr) {
+    border: none;
+    border-top: 1px solid var(--hairline);
+    margin: var(--stack) 0;
+  }
+
+  .fact-body :global(a) {
+    color: var(--info);
+  }
+</style>

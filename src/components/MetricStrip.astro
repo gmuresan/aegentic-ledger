@@ -1,0 +1,126 @@
+---
+// MetricStrip (Story 72.2, AC3) — the hero proof strip. Four metric-strip-stat items
+// rendered from the pre-built state.json aggregate (G7); never a runtime fetch.
+//
+// Non-negotiable rendering rules (EXPERIENCE.md §Component Patterns — Metric strip):
+//  - Figures render their FINAL values immediately for everyone — no count-tick, no
+//    animate-on-update (no JS at all; values are server-rendered text).
+//  - The blocks stat is labeled "moves blocked" — the policy is the fact, and the editorial
+//    adjective the spec bans (applied to "moves") is never used.
+//  - `0 drained` ALWAYS renders, but NEUTRAL in var(--ink-primary), scoped "to date" — never
+//    green (var(--proceed)), never a guarantee of future safety.
+//  - selfCustodiedCapital renders its formatted USD string, or "$—" (em-dash) when null —
+//    an honest unavailable, never a fabricated $0.
+import type { SelfCustodiedCapital } from '../lib/state-types';
+
+interface Props {
+  cyclesSupervised: number;
+  selfCustodiedCapital: SelfCustodiedCapital | null;
+  movesBlocked: number;
+  drained: 0;
+  generatedAt: string;
+}
+const { cyclesSupervised, selfCustodiedCapital, movesBlocked, drained, generatedAt } =
+  Astro.props;
+
+const capital = selfCustodiedCapital !== null ? selfCustodiedCapital.formatted : '$—';
+// Format in UTC so the freshness date is deterministic across build environments (it must
+// match the UTC date in generatedAt regardless of the runner's local timezone).
+const asOf = new Date(generatedAt).toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+---
+
+<div class="metric-strip" role="group" aria-label="The record, current as of last publish">
+  <div class="metric-strip-stat">
+    <span class="value mono">{cyclesSupervised}</span>
+    <span class="label">cycles supervised</span>
+  </div>
+  <div class="metric-strip-stat">
+    <span class="value mono">{capital}</span>
+    <span class="label">self-custodied</span>
+  </div>
+  <div class="metric-strip-stat">
+    <span class="value mono">{movesBlocked}</span>
+    <span class="label">moves blocked</span>
+  </div>
+  <div class="metric-strip-stat">
+    <span class="value mono drained">{drained}</span>
+    <span class="label">drained <span class="scope">to date</span></span>
+  </div>
+  <p class="freshness mono">as of {asOf}</p>
+</div>
+
+<style>
+  .metric-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gutter);
+    background: var(--surface-raised);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    padding: var(--stack);
+    margin: var(--section-gap-mobile) 0 0;
+  }
+
+  .metric-strip-stat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--stack-tight);
+  }
+
+  .value {
+    font-family: var(--font-mono);
+    font-size: var(--mono-data-lg-size);
+    font-weight: var(--mono-data-lg-weight);
+    color: var(--ink-primary);
+  }
+
+  /* 0 drained is an observed count, never a victory lap — neutral ink, never green. */
+  .value.drained {
+    color: var(--ink-primary);
+  }
+
+  .label {
+    font-family: var(--font-body);
+    font-size: var(--label-caps-size);
+    font-weight: var(--label-caps-weight);
+    letter-spacing: var(--label-caps-ls);
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .scope {
+    color: var(--ink-secondary);
+  }
+
+  .freshness {
+    flex-basis: 100%;
+    font-family: var(--font-mono);
+    font-size: var(--mono-sm-size);
+    color: var(--ink-muted);
+    margin: var(--stack-tight) 0 0;
+  }
+
+  /* ── Responsive (Story 72.3, AC5) — never overflow horizontally on mobile. ── */
+  /* Tablet: 2×2 grid so the four figures stay legible without scrolling. */
+  @media (max-width: 768px) {
+    .metric-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .freshness {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* Mobile: single column stack; the mono-data-lg figures stay readable full-width. */
+  @media (max-width: 480px) {
+    .metric-strip {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

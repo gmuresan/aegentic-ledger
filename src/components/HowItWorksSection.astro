@@ -1,0 +1,94 @@
+---
+// HowItWorksSection (Story 72.2, AC1 §2) — static, Gm-owned pitch copy. Three
+// how-it-works-step items framed as reader BENEFIT + mechanism (EXPERIENCE.md §Landing IA §2).
+// Plain language, no jargon, and must survive the banned-phrase gate (G2). These strings are
+// fixed at commit time and do NOT regenerate on each publish.
+const steps = [
+  {
+    benefit: 'You see the agent’s intent before anything moves.',
+    mechanism: 'The agent proposes an action — which protocol, how much, and why — in the open, before a single transaction is signed.',
+  },
+  {
+    benefit: 'A wrong move gets caught, not executed.',
+    mechanism: 'A supervised safety layer and a human approval gate review every intent; the rail blocks anything outside policy before it reaches the chain.',
+  },
+  {
+    benefit: 'You keep custody — the keys never leave the operator.',
+    mechanism: 'Every action executes self-custodied on-chain, and every execution is a transaction you can check on the block explorer yourself.',
+  },
+];
+---
+
+<section class="how-it-works" aria-label="How it works">
+  <h2 class="section-title">How it works</h2>
+  <ol class="steps">
+    {
+      steps.map((step, i) => (
+        <li class="how-it-works-step">
+          <span class="step-num mono">{i + 1}</span>
+          <div class="step-body">
+            <p class="benefit">{step.benefit}</p>
+            <p class="mechanism">{step.mechanism}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .how-it-works {
+    margin: var(--section-gap-mobile) 0 0;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--headline-size);
+    font-weight: 500;
+    color: var(--ink-primary);
+    margin: 0 0 var(--stack);
+  }
+
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--stack);
+  }
+
+  .how-it-works-step {
+    display: flex;
+    gap: var(--gutter);
+    align-items: flex-start;
+  }
+
+  .step-num {
+    font-family: var(--font-mono);
+    font-size: var(--mono-data-lg-size);
+    font-weight: var(--mono-data-lg-weight);
+    color: var(--brand);
+    line-height: 1;
+  }
+
+  .step-body {
+    max-width: var(--reading-measure);
+  }
+
+  .benefit {
+    font-family: var(--font-body);
+    font-size: var(--body-lg-size);
+    line-height: var(--body-lg-lh);
+    color: var(--ink-primary);
+    margin: 0;
+  }
+
+  .mechanism {
+    font-family: var(--font-body);
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    color: var(--ink-secondary);
+    margin: var(--stack-tight) 0 0;
+  }
+</style>

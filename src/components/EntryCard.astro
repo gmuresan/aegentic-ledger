@@ -1,0 +1,65 @@
+---
+// EntryCard (Story 72.1, AC3) — archive/timeline list item. surface-raised card
+// with a 3px left accent bar tinted by stream color (the at-a-glance stream
+// signal). The record is textual — no images.
+import StreamBadge from './StreamBadge.astro';
+
+interface Props {
+  title: string;
+  date: string;
+  stream: 'agent-ledger' | 'build-log';
+  slug: string;
+}
+const { title, date, stream, slug } = Astro.props;
+const accent = stream === 'agent-ledger' ? 'var(--stream-agent)' : 'var(--stream-build)';
+const displayDate = date.includes('T') ? date.slice(0, date.indexOf('T')) : date;
+---
+
+<a class="entry-card" href={`/ledger/${slug}/`} style={`--accent: ${accent}`}>
+  <div class="meta">
+    <StreamBadge stream={stream} />
+    <span class="date">{displayDate}</span>
+  </div>
+  <h2 class="title">{title}</h2>
+</a>
+
+<style>
+  .entry-card {
+    display: block;
+    position: relative;
+    background: var(--surface-raised);
+    border: 1px solid var(--hairline);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-md);
+    padding: var(--stack);
+    margin: var(--stack) 0;
+    text-decoration: none;
+  }
+
+  .entry-card:hover {
+    border-color: var(--hairline-strong);
+    border-left-color: var(--accent);
+    text-decoration: none;
+  }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: var(--gutter);
+    margin-bottom: var(--stack-tight);
+  }
+
+  .date {
+    font-family: var(--font-body);
+    font-size: var(--body-sm-size);
+    color: var(--ink-muted);
+  }
+
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--headline-sm-size);
+    font-weight: 500;
+    color: var(--ink-primary);
+    margin: 0;
+  }
+</style>

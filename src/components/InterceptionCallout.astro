@@ -1,0 +1,109 @@
+---
+// InterceptionCallout (Story 72.1, AC3) — the hero object of the system:
+// "the agent was about to do X; the rail stopped it." Strongest treatment of any
+// non-hero element: wash fill, a same-color edge, and a bold 3px left bar.
+//
+// The caution variant swaps every intercept token for the caution family
+// (critic flag / oscillation catch / projected-vs-realized miss).
+//
+// It is its own labeled region (a11y): an aria-labelled <section> with a
+// machine-rendered gate/policy eyebrow.
+//
+// Two call shapes (Story 72.2, AC1 §3 / Task 3.3):
+//  - Entry-page variant: pass {eyebrow, title, body} directly (Story 72.1).
+//  - Landing-section variant: pass {policyLabel, intentSummary, entrySlug} from the
+//    state.json aggregate. policyLabel becomes the eyebrow, intentSummary the title, and
+//    when entrySlug is non-null the whole callout links to that entry's page.
+interface Props {
+  variant?: 'intercept' | 'caution';
+  eyebrow?: string;
+  title?: string;
+  body?: string;
+  // Landing-section variant (state.json InterceptionItem):
+  policyLabel?: string;
+  intentSummary?: string;
+  entrySlug?: string | null;
+}
+const { variant = 'intercept', body, policyLabel, intentSummary, entrySlug } = Astro.props;
+// Landing-section fields take precedence as the machine eyebrow/title when present.
+const eyebrow = policyLabel ?? Astro.props.eyebrow ?? '';
+const title = intentSummary ?? Astro.props.title ?? '';
+const href = entrySlug != null ? `/ledger/${entrySlug}/` : undefined;
+---
+
+<section
+  class:list={['interception-callout', variant]}
+  aria-label={`${variant === 'intercept' ? 'Interception' : 'Caution'}: ${eyebrow}`}
+>
+  <p class="eyebrow">{eyebrow}</p>
+  {
+    href ? (
+      <a class="title-link" href={href}>
+        <h3 class="title">{title}</h3>
+      </a>
+    ) : (
+      <h3 class="title">{title}</h3>
+    )
+  }
+  {body && <p class="body">{body}</p>}
+</section>
+
+<style>
+  .interception-callout {
+    border-radius: var(--radius-md);
+    padding: var(--stack);
+    margin: var(--stack) 0;
+  }
+
+  .interception-callout.intercept {
+    background: var(--intercept-wash);
+    border: 1px solid var(--intercept-edge);
+    border-left: 3px solid var(--intercept);
+  }
+
+  .interception-callout.caution {
+    background: var(--caution-wash);
+    border: 1px solid var(--caution-edge);
+    border-left: 3px solid var(--caution);
+  }
+
+  .eyebrow {
+    font-family: var(--font-body);
+    font-size: var(--label-caps-size);
+    font-weight: var(--label-caps-weight);
+    letter-spacing: var(--label-caps-ls);
+    text-transform: uppercase;
+    margin: 0 0 var(--stack-tight);
+  }
+
+  .intercept .eyebrow {
+    color: var(--intercept);
+  }
+
+  .caution .eyebrow {
+    color: var(--caution);
+  }
+
+  .title {
+    font-family: var(--font-display);
+    font-size: var(--headline-sm-size);
+    font-weight: 500;
+    color: var(--ink-primary);
+    margin: 0;
+  }
+
+  .title-link {
+    text-decoration: none;
+  }
+
+  .title-link:hover .title {
+    text-decoration: underline;
+  }
+
+  .body {
+    font-family: var(--font-body);
+    font-size: var(--body-size);
+    color: var(--ink-secondary);
+    margin: var(--stack-tight) 0 0;
+  }
+</style>

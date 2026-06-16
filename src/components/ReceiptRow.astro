@@ -1,0 +1,64 @@
+---
+// ReceiptRow (Story 72.1, AC3) — the atom of credibility. A surface-ledger strip:
+// muted verb · exact amount (full precision, mono) · truncated tx hash + explorer
+// link. The explorer name is derived per entry from that entry's chain — never
+// hard-code BaseScan as the product's explorer.
+interface Props {
+  verb: string;
+  amount: string;
+  hash: string;
+  explorerUrl: string;
+  explorerName?: string;
+}
+const { verb, amount, hash, explorerUrl, explorerName } = Astro.props;
+const shortHash = hash.length > 14 ? `${hash.slice(0, 8)}…${hash.slice(-6)}` : hash;
+const linkLabel = explorerName ? `↗ ${explorerName}` : '↗ view on the block explorer';
+---
+
+<div class="receipt-row">
+  <span class="verb">{verb}</span>
+  <span class="amount mono">{amount}</span>
+  <span class="hash mono" title={hash}>{shortHash}</span>
+  <a class="explorer" href={explorerUrl} rel="noopener noreferrer" target="_blank">{linkLabel}</a>
+</div>
+
+<style>
+  .receipt-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--gutter);
+    background: var(--surface-ledger);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+    padding: var(--stack-tight) var(--stack);
+    margin: var(--stack-tight) 0;
+  }
+
+  .verb {
+    font-family: var(--font-body);
+    font-size: var(--body-sm-size);
+    color: var(--ink-muted);
+    min-width: 5rem;
+  }
+
+  .amount {
+    font-family: var(--font-mono);
+    font-size: var(--mono-data-size);
+    color: var(--ink-primary);
+  }
+
+  .hash {
+    font-family: var(--font-mono);
+    font-size: var(--mono-data-size);
+    color: var(--ink-secondary);
+    user-select: all;
+  }
+
+  .explorer {
+    font-family: var(--font-body);
+    font-size: var(--body-sm-size);
+    color: var(--info);
+    margin-left: auto;
+  }
+</style>

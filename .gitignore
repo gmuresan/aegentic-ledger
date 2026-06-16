@@ -1,33 +1,7 @@
-# OS / editor noise only — this repo holds ONLY generated, redaction-gated public artifacts.
-# Never commit secrets, keys, .env files, or the local overseer DB here.
-
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-._*
-
-# Editors
-*.swp
-*.swo
-*~
-.idea/
-.vscode/
-
-# Misc
-Thumbs.db
-*.log
-
-# Build output (Cloudflare Pages rebuilds it; never commit)
+# Astro build output + generated artifacts (Story 72.1)
 dist/
-
-# Tooling artifacts
+.astro/
 node_modules/
-.wrangler/
-.DS_Store
 
-# Defensive: never let an env/key file in even by accident
-.env
-.env.*
-*.key
-*.pem
+# Astro-generated content-collection / env type shim (regenerated on every build)
+src/env.d.ts

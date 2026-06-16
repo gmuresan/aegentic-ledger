@@ -5,7 +5,9 @@ agent: "yield-hunter"
 wallet: "0x326e18Ade6Edc700F765F0906B5C5f05FF51F753"
 ---
 
-# Public Ledger — yield-hunter
+This is the opening stretch of an autonomous yield agent's public record — real moves, on real capital, on Base mainnet. Every transaction below was proposed by the agent and approved by a human operator before it could broadcast. The record also keeps what did not go through: an unsupported whitelist-add the agent asked for, a proposal that expired before any approval arrived, and a swap that reverted on slippage and fell back to a plain deposit rather than retrying blind. The on-chain receipts are linked throughout.
+
+---
 
 ## Entry: 2026-06-09 — morpho-vault rotation
 

@@ -1,0 +1,57 @@
+{
+  "generatedAt": "2026-06-16T14:26:44.954Z",
+  "cyclesSupervised": 36,
+  "selfCustodiedCapital": {
+    "formatted": "$95.39",
+    "symbol": "USD"
+  },
+  "movesBlocked": 2,
+  "drained": 0,
+  "currentPositions": [
+    {
+      "protocol": "aave-v3",
+      "token": "aave-v3",
+      "positionUsd": "0.000005"
+    },
+    {
+      "protocol": "compound-v3",
+      "token": "compound-v3",
+      "positionUsd": null
+    },
+    {
+      "protocol": "morpho-vault",
+      "token": "morpho-vault",
+      "positionUsd": "78.729541"
+    }
+  ],
+  "latestInterceptions": [
+    {
+      "policyLabel": "approval-timeout",
+      "intentSummary": "approval_timeout after 300000ms",
+      "entrySlug": null
+    },
+    {
+      "policyLabel": "unsupported",
+      "intentSummary": "whitelist_add",
+      "entrySlug": null
+    }
+  ],
+  "latestByStream": {
+    "agent": [
+      {
+        "slug": "2026-06-12-yield-hunter-01",
+        "title": "yield-hunter — initial ledger (real rotations through 2026-06-09)",
+        "date": "2026-06-12",
+        "stream": "agent-ledger"
+      }
+    ],
+    "build": [
+      {
+        "slug": "2026-05-29-build-log-01",
+        "title": "Epic 17 — moving the signing key out of the agent and into the overseer",
+        "date": "2026-05-29",
+        "stream": "build-log"
+      }
+    ]
+  }
+}

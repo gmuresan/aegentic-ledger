@@ -1,0 +1,181 @@
+---
+// Ledger archive (Story 72.1, AC2) — /ledger/ lists every entry NEWEST-FIRST as
+// a styled list of EntryCard components (not a flat markdown table). Sorted by
+// frontmatter `date` descending.
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EntryCard from '../../components/EntryCard.astro';
+
+const entries = await getCollection('ledger');
+// Newest-first by date. Ties fall back to the slug (filename) descending, which
+// preserves the 71 same-day seq ordering (seq 02 above seq 01).
+const sorted = entries.sort((a, b) => {
+  const byDate = b.data.date.localeCompare(a.data.date);
+  return byDate !== 0 ? byDate : b.slug.localeCompare(a.slug);
+});
+const wallet = sorted[0]?.data.wallet;
+---
+
+<BaseLayout title="Ledger — Aegentic" wallet={wallet}>
+  <header class="archive-head">
+    <p class="eyebrow">THE RECORD</p>
+    <h1>Ledger</h1>
+    <p class="lede">
+      Every supervised cycle, on the record — what the agent proposed, what the safety layer
+      caught, and the on-chain receipts you can check yourself.
+    </p>
+  </header>
+
+  {
+    sorted.length === 0 ? (
+      <p class="empty">No entries yet.</p>
+    ) : (
+      <>
+        {/* Stream filter (Story 72.8, AC1) — progressive enhancement. The control is
+            hidden by default and revealed by the inline script; JS-off readers get the
+            full interleaved list with no broken UI. `?stream=` is client-side only —
+            no server-side filtering, no dynamic [stream].astro route. */}
+        <div data-stream-filter class="stream-filter js-only" hidden>
+          <span class="filter-label">Filter:</span>
+          <button type="button" data-stream-value="all" class="active">All</button>
+          <button type="button" data-stream-value="agent-ledger">Agent Ledger</button>
+          <button type="button" data-stream-value="build-log">Build Log</button>
+        </div>
+
+        <ol class="entry-list">
+          {sorted.map((entry) => (
+            <li data-stream-entry={entry.data.stream}>
+              <EntryCard
+                title={entry.data.title}
+                date={entry.data.date}
+                stream={entry.data.stream}
+                slug={entry.slug}
+              />
+            </li>
+          ))}
+        </ol>
+      </>
+    )
+  }
+
+  <script is:inline>
+    (function () {
+      const filter = document.querySelector('[data-stream-filter]');
+      if (!filter) return;
+      filter.removeAttribute('hidden'); // progressive-enhancement reveal
+
+      function applyFilter(stream) {
+        document.querySelectorAll('[data-stream-entry]').forEach(function (el) {
+          el.style.display =
+            stream === 'all' || el.dataset.streamEntry === stream ? '' : 'none';
+        });
+        document.querySelectorAll('[data-stream-value]').forEach(function (btn) {
+          btn.classList.toggle('active', btn.dataset.streamValue === stream);
+        });
+        const url = new URL(location.href);
+        if (stream === 'all') url.searchParams.delete('stream');
+        else url.searchParams.set('stream', stream);
+        history.pushState({}, '', url);
+      }
+
+      const initial = new URLSearchParams(location.search).get('stream') || 'all';
+      applyFilter(initial);
+
+      filter.addEventListener('click', function (e) {
+        const btn = e.target.closest('[data-stream-value]');
+        if (btn) applyFilter(btn.dataset.streamValue);
+      });
+    })();
+  </script>
+</BaseLayout>
+
+<style>
+  .archive-head {
+    max-width: var(--entry-max);
+    margin: var(--stack) 0 var(--section-gap-mobile);
+  }
+
+  .eyebrow {
+    font-family: var(--font-body);
+    font-size: var(--label-caps-size);
+    font-weight: var(--label-caps-weight);
+    letter-spacing: var(--label-caps-ls);
+    color: var(--ink-muted);
+    margin: 0 0 var(--stack-tight);
+  }
+
+  .archive-head h1 {
+    font-family: var(--font-display);
+    font-size: var(--display-lg-size);
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .lede {
+    font-family: var(--font-body);
+    font-size: var(--body-lg-size);
+    line-height: var(--body-lg-lh);
+    color: var(--ink-secondary);
+    max-width: var(--reading-measure);
+    margin: var(--stack) 0 0;
+  }
+
+  .entry-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-width: var(--entry-max);
+  }
+
+  /* Stream filter (72.8) — hidden until the inline script reveals it (the [hidden]
+     attr handles the JS-off case; .js-only is a defensive belt for any path that
+     forgets to set [hidden]). */
+  .stream-filter[hidden] {
+    display: none;
+  }
+
+  .stream-filter {
+    display: flex;
+    align-items: center;
+    gap: var(--stack-tight);
+    flex-wrap: wrap;
+    max-width: var(--entry-max);
+    margin: 0 0 var(--stack);
+  }
+
+  .stream-filter .filter-label {
+    font-family: var(--font-body);
+    font-size: var(--label-caps-size);
+    font-weight: var(--label-caps-weight);
+    letter-spacing: var(--label-caps-ls);
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-right: var(--stack-tight);
+  }
+
+  .stream-filter button {
+    font-family: var(--font-body);
+    font-size: var(--body-sm-size);
+    color: var(--ink-secondary);
+    background: transparent;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+
+  .stream-filter button:hover {
+    border-color: var(--hairline-strong);
+    color: var(--ink-primary);
+  }
+
+  .stream-filter button.active {
+    color: var(--ink-primary);
+    border-color: var(--hairline-strong);
+    background: var(--surface-raised);
+  }
+
+  .empty {
+    color: var(--ink-muted);
+  }
+</style>

@@ -1,0 +1,118 @@
+---
+// Per-entry page (Story 72.1, AC2/AC3) — /ledger/<slug>/ where slug = filename
+// without `.md`. Reads the entry from the `ledger` collection, splits the body on
+// the `---` wall into prose (commentary, above) and fact (evidence, below), and
+// renders the fixed Aegentic entry layout.
+//
+// The split + markdown render happens at build time (no client JS). The fact half
+// goes into the labeled <section class="fact-panel"> landmark; the prose half sits
+// above the visual fact-wall.
+//
+// Story 72.5 adds the above-fold interception callouts and the structured receipt
+// rows — BOTH derived only from the deterministic fact panel text via the pure
+// parseEntrySignals / parseReceiptRows functions (G1 provenance). The eyebrow on
+// every callout is a machine-rendered, all-caps label — never the writer's voice.
+import { getCollection } from 'astro:content';
+import { marked } from 'marked';
+import EntryLayout from '../../layouts/EntryLayout.astro';
+import FactPanel from '../../components/FactPanel.astro';
+import InterceptionCallout from '../../components/InterceptionCallout.astro';
+import ReceiptRow from '../../components/ReceiptRow.astro';
+import { splitEntry } from '../../lib/split-entry';
+import { parseEntrySignals, parseReceiptRows, type EntrySignal } from '../../lib/parse-entry-signals';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('ledger');
+  return entries.map((entry) => ({
+    // The collection id is the path under src/content/ledger; the slug is the
+    // filename without `.md`, matching the 71 permalink scheme.
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { prose, fact } = splitEntry(entry.body);
+
+// Deterministic, build-time markdown → HTML. No network, no DB (G7).
+const proseHtml = marked.parse(prose, { async: false }) as string;
+const factHtml = fact ? (marked.parse(fact, { async: false }) as string) : '';
+
+// Derive the above-fold callouts and receipt rows ONLY from the deterministic
+// fact text — never from the prose (G1). The eyebrow is always machine-rendered.
+const signals = parseEntrySignals(fact);
+const receipts = parseReceiptRows(fact);
+
+interface CalloutProps {
+  variant: 'intercept' | 'caution';
+  eyebrow: string;
+  title: string;
+}
+
+// Map each parsed signal to InterceptionCallout props (variant + eyebrow + title).
+// See Story 72.5 Dev Notes "Callout signal → InterceptionCallout prop mapping".
+function toCallout(signal: EntrySignal): CalloutProps {
+  switch (signal.kind) {
+    case 'denial':
+      return {
+        variant: 'intercept',
+        eyebrow: `BLOCKED · ${signal.policyLabel.toUpperCase()}`,
+        title: signal.intentSummary,
+      };
+    case 'critic':
+      return {
+        variant: signal.severity.toLowerCase() === 'error' ? 'intercept' : 'caution',
+        eyebrow: `CRITIC FLAG · ${signal.severity.toUpperCase()}`,
+        title: signal.detail,
+      };
+    case 'critic-summary':
+      return { variant: 'caution', eyebrow: 'CRITIC SUMMARY', title: signal.text };
+    case 'oscillation':
+      return {
+        variant: 'caution',
+        eyebrow: 'OSCILLATION CAUGHT',
+        title: 'A repeated back-and-forth was detected and suppressed.',
+      };
+    case 'apr-miss':
+      return {
+        variant: 'caution',
+        eyebrow: 'APY DELTA',
+        title: `Projected ${signal.projected}% → realized ${signal.realized}% (delta ${signal.delta})`,
+      };
+  }
+}
+
+const callouts = signals.map(toCallout);
+---
+
+<EntryLayout
+  title={entry.data.title}
+  date={entry.data.date}
+  stream={entry.data.stream}
+  wallet={entry.data.wallet}
+>
+  {
+    callouts.map((c) => (
+      <InterceptionCallout
+        slot="callouts"
+        variant={c.variant}
+        eyebrow={c.eyebrow}
+        title={c.title}
+      />
+    ))
+  }
+  <Fragment slot="prose" set:html={proseHtml} />
+  {factHtml && <FactPanel slot="fact" html={factHtml} />}
+  {
+    receipts.map((r) => (
+      <ReceiptRow
+        slot="receipts"
+        verb={r.verb}
+        amount={r.amount}
+        hash={r.hash}
+        explorerUrl={r.explorerUrl}
+        explorerName={r.explorerName}
+      />
+    ))
+  }
+</EntryLayout>

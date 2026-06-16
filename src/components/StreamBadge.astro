@@ -1,0 +1,41 @@
+---
+// StreamBadge (Story 72.1, AC3) — outlined chip with a leading dot identifying
+// the stream. Outlined-not-filled is deliberate: the badge identifies a stream,
+// it must never compete visually with a verdict callout.
+interface Props {
+  stream: 'agent-ledger' | 'build-log';
+}
+const { stream } = Astro.props;
+const isAgent = stream === 'agent-ledger';
+const label = isAgent ? 'AGENT LEDGER' : 'BUILD LOG';
+const color = isAgent ? 'var(--stream-agent)' : 'var(--stream-build)';
+---
+
+<span class="stream-badge" data-stream={stream} style={`color: ${color}`}>
+  <span class="dot" aria-hidden="true"></span>
+  {label}
+</span>
+
+<style>
+  .stream-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--stack-tight);
+    border: 1px solid currentColor;
+    border-radius: var(--radius-sm);
+    padding: 3px 8px;
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: var(--label-caps-size);
+    font-weight: var(--label-caps-weight);
+    letter-spacing: var(--label-caps-ls);
+    line-height: 1.3;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full, 9999px);
+    background: currentColor;
+  }
+</style>
