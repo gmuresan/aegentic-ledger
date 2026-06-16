@@ -9,8 +9,12 @@ interface Props {
   date: string;
   stream: 'agent-ledger' | 'build-log';
   slug: string;
+  // Story 75.5 (AC3): optional per-agent attribution. When present and non-empty, a small
+  // agent chip renders beside the stream badge so readers see which agent authored the entry
+  // at a glance. Absent (pre-75.5 entries) → no chip, never an error.
+  agentSlug?: string;
 }
-const { title, date, stream, slug } = Astro.props;
+const { title, date, stream, slug, agentSlug } = Astro.props;
 const accent = stream === 'agent-ledger' ? 'var(--stream-agent)' : 'var(--stream-build)';
 const displayDate = date.includes('T') ? date.slice(0, date.indexOf('T')) : date;
 ---
@@ -20,6 +24,7 @@ const displayDate = date.includes('T') ? date.slice(0, date.indexOf('T')) : date
     <StreamBadge stream={stream} />
     <span class="date">{displayDate}</span>
   </div>
+  {agentSlug && <span class="agent-chip">{agentSlug}</span>}
   <h2 class="title">{title}</h2>
 </a>
 
@@ -53,6 +58,15 @@ const displayDate = date.includes('T') ? date.slice(0, date.indexOf('T')) : date
     font-family: var(--font-body);
     font-size: var(--body-sm-size);
     color: var(--ink-muted);
+  }
+
+  /* Per-agent attribution chip (75.5, AC3) — same scale as the date, muted, no decoration. */
+  .agent-chip {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--body-sm-size);
+    color: var(--ink-muted);
+    margin-bottom: var(--stack-tight);
   }
 
   .title {

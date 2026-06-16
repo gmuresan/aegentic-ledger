@@ -1,0 +1,77 @@
+---
+// FleetRosterSection (Story 75.5, AC1/AC4) — the "fleet" section: one overseer, the
+// agents it supervises. Renders an AgentCard per entry in `perAgent`, each linking to that
+// agent's own page. The lede stays honest about count: "an agent" when exactly one is
+// supervised, "agents" when two or more — never implying a fleet that isn't there (AC4).
+//
+// Copy must pass the lintHomepageCopy banned-phrase gate (G2): no overclaiming terms,
+// no return promises.
+import type { PerAgentState } from '../lib/state-types';
+import AgentCard from './AgentCard.astro';
+
+interface Props {
+  perAgent: Record<string, PerAgentState>;
+}
+const { perAgent } = Astro.props;
+
+const agents = Object.entries(perAgent);
+const noun = agents.length === 1 ? 'agent' : 'agents';
+---
+
+<section class="fleet" aria-label="The fleet">
+  <p class="eyebrow">THE FLEET</p>
+  <p class="lede">
+    One overseer, supervising {agents.length} {noun}. Keys stay home — the overseer holds the
+    line, and each agent's own record is one click away.
+  </p>
+  <div class="roster">
+    {
+      agents.map(([agentName, agent]) => (
+        <AgentCard
+          agentName={agent.agentName}
+          cyclesSupervised={agent.cyclesSupervised}
+          selfCustodiedCapital={agent.selfCustodiedCapital}
+          drained={agent.drained}
+          href={`/agents/${agentName}/`}
+        />
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .fleet {
+    margin: var(--section-gap-mobile) 0 0;
+    max-width: var(--content-max);
+  }
+
+  .eyebrow {
+    font-family: var(--font-body);
+    font-size: var(--label-caps-size);
+    font-weight: var(--label-caps-weight);
+    letter-spacing: var(--label-caps-ls);
+    color: var(--brand);
+    margin: 0 0 var(--stack-tight);
+  }
+
+  .lede {
+    font-family: var(--font-body);
+    font-size: var(--body-lg-size);
+    line-height: var(--body-lg-lh);
+    color: var(--ink-secondary);
+    max-width: var(--reading-measure);
+    margin: 0 0 var(--stack);
+  }
+
+  .roster {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--gutter);
+  }
+
+  @media (max-width: 480px) {
+    .roster {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

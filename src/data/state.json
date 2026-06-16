@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-16T14:26:44.954Z",
+  "generatedAt": "2026-06-16T20:42:58.937Z",
   "cyclesSupervised": 36,
   "selfCustodiedCapital": {
     "formatted": "$95.39",
@@ -24,18 +24,7 @@
       "positionUsd": "78.729541"
     }
   ],
-  "latestInterceptions": [
-    {
-      "policyLabel": "approval-timeout",
-      "intentSummary": "approval_timeout after 300000ms",
-      "entrySlug": null
-    },
-    {
-      "policyLabel": "unsupported",
-      "intentSummary": "whitelist_add",
-      "entrySlug": null
-    }
-  ],
+  "latestInterceptions": [],
   "latestByStream": {
     "agent": [
       {

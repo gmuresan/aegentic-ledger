@@ -14,6 +14,11 @@ const sorted = entries.sort((a, b) => {
   return byDate !== 0 ? byDate : b.slug.localeCompare(a.slug);
 });
 const wallet = sorted[0]?.data.wallet;
+
+// Story 75.5 (AC3): per-agent filter options — one button per distinct agentSlug observed in
+// the collection, plus "All". Entries without an agentSlug (pre-75.5) are grouped under "All"
+// and never hidden; they carry data-agent-entry="unknown".
+const agentSlugs = [...new Set(sorted.map((e) => e.data.agentSlug).filter(Boolean))] as string[];
 ---
 
 <BaseLayout title="Ledger — Aegentic" wallet={wallet}>
@@ -42,14 +47,33 @@ const wallet = sorted[0]?.data.wallet;
           <button type="button" data-stream-value="build-log">Build Log</button>
         </div>
 
+        {/* Per-agent filter (Story 75.5, AC3) — progressive enhancement, mirrors the stream
+            filter. Hidden until the inline script reveals it; JS-off readers get the full list.
+            Only rendered when at least one entry carries an agentSlug. */}
+        {agentSlugs.length > 0 && (
+          <div data-agent-filter class="stream-filter agent-filter js-only" hidden>
+            <span class="filter-label">Agent:</span>
+            <button type="button" data-agent-value="all" class="active">All</button>
+            {agentSlugs.map((slug) => (
+              <button type="button" data-agent-value={slug}>
+                {slug}
+              </button>
+            ))}
+          </div>
+        )}
+
         <ol class="entry-list">
           {sorted.map((entry) => (
-            <li data-stream-entry={entry.data.stream}>
+            <li
+              data-stream-entry={entry.data.stream}
+              data-agent-entry={entry.data.agentSlug ?? 'unknown'}
+            >
               <EntryCard
                 title={entry.data.title}
                 date={entry.data.date}
                 stream={entry.data.stream}
                 slug={entry.slug}
+                agentSlug={entry.data.agentSlug}
               />
             </li>
           ))}
@@ -60,31 +84,59 @@ const wallet = sorted[0]?.data.wallet;
 
   <script is:inline>
     (function () {
-      const filter = document.querySelector('[data-stream-filter]');
-      if (!filter) return;
-      filter.removeAttribute('hidden'); // progressive-enhancement reveal
+      const streamFilter = document.querySelector('[data-stream-filter]');
+      const agentFilter = document.querySelector('[data-agent-filter]');
+      if (!streamFilter && !agentFilter) return;
+      // Progressive-enhancement reveal (only the controls that exist).
+      if (streamFilter) streamFilter.removeAttribute('hidden');
+      if (agentFilter) agentFilter.removeAttribute('hidden');
 
-      function applyFilter(stream) {
+      const params = new URLSearchParams(location.search);
+      let stream = params.get('stream') || 'all';
+      let agent = params.get('agent') || 'all';
+
+      // Both filters compose: an entry shows only when it matches the active stream AND the
+      // active agent. Each filter is independent — setting one never clears the other.
+      function render() {
         document.querySelectorAll('[data-stream-entry]').forEach(function (el) {
-          el.style.display =
-            stream === 'all' || el.dataset.streamEntry === stream ? '' : 'none';
+          const streamOk = stream === 'all' || el.dataset.streamEntry === stream;
+          const agentOk = agent === 'all' || el.dataset.agentEntry === agent;
+          el.style.display = streamOk && agentOk ? '' : 'none';
         });
         document.querySelectorAll('[data-stream-value]').forEach(function (btn) {
           btn.classList.toggle('active', btn.dataset.streamValue === stream);
         });
+        document.querySelectorAll('[data-agent-value]').forEach(function (btn) {
+          btn.classList.toggle('active', btn.dataset.agentValue === agent);
+        });
         const url = new URL(location.href);
         if (stream === 'all') url.searchParams.delete('stream');
         else url.searchParams.set('stream', stream);
+        if (agent === 'all') url.searchParams.delete('agent');
+        else url.searchParams.set('agent', agent);
         history.pushState({}, '', url);
       }
 
-      const initial = new URLSearchParams(location.search).get('stream') || 'all';
-      applyFilter(initial);
+      render();
 
-      filter.addEventListener('click', function (e) {
-        const btn = e.target.closest('[data-stream-value]');
-        if (btn) applyFilter(btn.dataset.streamValue);
-      });
+      if (streamFilter) {
+        streamFilter.addEventListener('click', function (e) {
+          const btn = e.target.closest('[data-stream-value]');
+          if (btn) {
+            stream = btn.dataset.streamValue;
+            render();
+          }
+        });
+      }
+      if (agentFilter) {
+        agentFilter.addEventListener('click', function (e) {
+          const btn = e.target.closest('[data-agent-value]');
+          if (btn) {
+            agent = btn.dataset.agentValue;
+            render();
+          }
+        });
+      }
     })();
   </script>
 </BaseLayout>

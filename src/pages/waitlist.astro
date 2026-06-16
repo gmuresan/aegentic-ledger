@@ -1,0 +1,30 @@
+---
+// Dedicated /waitlist page (Story 75.8, AC1). A minimal surface that renders the shared
+// WaitlistSection. The Buttondown embed script ships with the component, so it is present here
+// (a waitlist surface) but stays out of the layout shell — entry/agent/archive/about pages that
+// do not render WaitlistSection remain script-clean (AC3).
+import BaseLayout from '../layouts/BaseLayout.astro';
+import WaitlistSection from '../components/WaitlistSection.astro';
+---
+
+<BaseLayout title="Waitlist — Aegentic Ledger">
+  <article class="waitlist-page">
+    <h1>Join the waitlist</h1>
+    <WaitlistSection />
+  </article>
+</BaseLayout>
+
+<style>
+  .waitlist-page {
+    max-width: var(--reading-measure);
+    margin: var(--stack) 0;
+  }
+
+  .waitlist-page h1 {
+    font-family: var(--font-display);
+    font-size: var(--display-lg-size);
+    font-weight: 500;
+    color: var(--ink-primary);
+    margin: 0 0 var(--stack);
+  }
+</style>

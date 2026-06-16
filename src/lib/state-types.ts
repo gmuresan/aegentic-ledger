@@ -23,7 +23,7 @@ export interface CurrentPosition {
   protocol: string;
   token: string;
   symbol?: string;
-  positionUsd: string | null; // formatted USD string or null if unpriced
+  positionUsd: string | null; // raw decimal number string (e.g. "1234.5") or null if unpriced
 }
 
 export interface StreamEntryRef {
@@ -31,6 +31,29 @@ export interface StreamEntryRef {
   title: string;
   date: string; // ISO date string (YYYY-MM-DD) from entry frontmatter
   stream: 'agent-ledger' | 'build-log';
+}
+
+// Story 75.4 (AC4): mirrors PerAgentState / FleetState from the generator
+// (scripts/generate-homepage-state.ts). Copy verbatim — keep in sync with the
+// generator when the fleet aggregate schema changes.
+export interface PerAgentState {
+  agentName: string; // DB identifier (e.g. "yield-dev")
+  /** Public-facing slug used in entry frontmatter `agentSlug`; absent when it equals agentName. */
+  publicSlug?: string;
+  cyclesSupervised: number;
+  movesBlocked: number;
+  selfCustodiedCapital: SelfCustodiedCapital | null; // null = no snapshot
+  drained: 0;
+  currentPositions: CurrentPosition[];
+  latestInterceptions: InterceptionItem[];
+}
+
+export interface FleetState {
+  agentsCount: number;
+  cyclesSupervised: number;
+  movesBlocked: number;
+  selfCustodiedCapital: SelfCustodiedCapital | null; // null = ALL agents have no snapshot
+  drained: 0;
 }
 
 export interface HomepageState {
@@ -45,4 +68,7 @@ export interface HomepageState {
     agent: StreamEntryRef[]; // up to 3, newest first
     build: StreamEntryRef[]; // up to 3, newest first
   };
+  // Story 75.4: optional fleet aggregate (absent on single-agent states).
+  fleet?: FleetState;
+  perAgent?: Record<string, PerAgentState>;
 }

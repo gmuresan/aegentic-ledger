@@ -15,6 +15,7 @@
 import { getCollection } from 'astro:content';
 import { marked } from 'marked';
 import EntryLayout from '../../layouts/EntryLayout.astro';
+import ScreenshotGallery from '../../components/ScreenshotGallery.astro';
 import FactPanel from '../../components/FactPanel.astro';
 import InterceptionCallout from '../../components/InterceptionCallout.astro';
 import ReceiptRow from '../../components/ReceiptRow.astro';
@@ -101,6 +102,10 @@ const callouts = signals.map(toCallout);
       />
     ))
   }
+  {/* Story 75.7 (AC2) — the screenshot slot is wired but empty today: entries carry no 1:1
+      screenshot mapping yet. The slot is here so a future story can attribute an entry-level
+      screenshot without another layout change. */}
+  <ScreenshotGallery slot="screenshot" shots={[]} />
   <Fragment slot="prose" set:html={proseHtml} />
   {factHtml && <FactPanel slot="fact" html={factHtml} />}
   {

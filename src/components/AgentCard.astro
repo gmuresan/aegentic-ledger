@@ -1,0 +1,104 @@
+---
+// AgentCard (Story 75.5, AC1/AC2) — a single agent in the fleet roster. surface-raised
+// card matching EntryCard's chrome (border, radius-md). Shows the agent's public name, its
+// self-custodied capital ($— when null), cycles supervised, and a link to its own journey.
+//
+// No operator identity and no wallet address on this card — the agent name only; the
+// per-agent page surfaces the public wallet. `drained: 0` is rendered neutral, scoped
+// "to date" — consistent with MetricStrip; never green, never a guarantee.
+import type { SelfCustodiedCapital } from '../lib/state-types';
+
+interface Props {
+  agentName: string;
+  cyclesSupervised: number;
+  selfCustodiedCapital: SelfCustodiedCapital | null;
+  drained: 0;
+  href: string;
+}
+const { agentName, cyclesSupervised, selfCustodiedCapital, drained, href } = Astro.props;
+const capital = selfCustodiedCapital !== null ? selfCustodiedCapital.formatted : '$—';
+---
+
+<a class="agent-card" href={href}>
+  <span class="agent-name">{agentName}</span>
+  <div class="figures">
+    <div class="figure">
+      <span class="value mono">{capital}</span>
+      <span class="label">self-custodied</span>
+    </div>
+    <div class="figure">
+      <span class="value mono">{cyclesSupervised}</span>
+      <span class="label">cycles supervised</span>
+    </div>
+    <div class="figure">
+      <span class="value mono">{drained}</span>
+      <span class="label">drained <span class="scope">to date</span></span>
+    </div>
+  </div>
+  <span class="journey">VIEW JOURNEY →</span>
+</a>
+
+<style>
+  .agent-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--stack);
+    background: var(--surface-raised);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    padding: var(--stack);
+    text-decoration: none;
+  }
+
+  .agent-card:hover {
+    border-color: var(--hairline-strong);
+    text-decoration: none;
+  }
+
+  .agent-name {
+    font-family: var(--font-display);
+    font-size: var(--headline-sm-size);
+    font-weight: 500;
+    color: var(--ink-primary);
+  }
+
+  .figures {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gutter);
+  }
+
+  .figure {
+    display: flex;
+    flex-direction: column;
+    gap: var(--stack-tight);
+  }
+
+  .value {
+    font-family: var(--font-mono);
+    font-size: var(--mono-data-lg-size);
+    font-weight: var(--mono-data-lg-weight);
+    color: var(--ink-primary);
+  }
+
+  .label {
+    font-family: var(--font-body);
+    font-size: var(--label-caps-size);
+    font-weight: var(--label-caps-weight);
+    letter-spacing: var(--label-caps-ls);
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .scope {
+    color: var(--ink-secondary);
+  }
+
+  .journey {
+    font-family: var(--font-body);
+    font-size: var(--label-caps-size);
+    font-weight: var(--label-caps-weight);
+    letter-spacing: var(--label-caps-ls);
+    color: var(--brand);
+  }
+</style>

@@ -1,0 +1,277 @@
+---
+// Per-agent page (Story 75.5, AC2/AC4) — /agents/<agentSlug>/ renders one agent's own
+// journey: its public wallet, current positions, per-agent metric strip, and its newest-first
+// ledger entries. Every figure is the per-agent aggregate from state.perAgent[agentName]
+// (G13 — grounded, never re-derived). The entry list is the `ledger` collection filtered by
+// the frontmatter `agentSlug`; entries written before 75.5 omit the field and simply do not
+// appear here (an honest empty state, never an error).
+//
+// G7 build-time isolation: state.json is a STATIC import resolved at build time; getStaticPaths
+// reads it to emit one path per agent. No runtime HTTP call. If state.perAgent is absent/empty,
+// getStaticPaths returns [] — no agent pages built, no build error (AC4).
+//
+// Copy must pass the lintHomepageCopy banned-phrase gate (G2): no overclaiming terms, no
+// return promises. No operator identity is rendered — only the agent's public name + wallet.
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import MetricStrip from '../../components/MetricStrip.astro';
+import EntryCard from '../../components/EntryCard.astro';
+import ScreenshotGallery from '../../components/ScreenshotGallery.astro';
+import state from '../../data/state.json';
+import screenshotsRaw from '../../data/screenshots.json';
+import type { HomepageState, PerAgentState } from '../../lib/state-types';
+import type { ScreenshotManifestEntry } from '../../lib/screenshot-types';
+
+const s = state as HomepageState;
+
+export function getStaticPaths() {
+  const homepageState = state as HomepageState;
+  if (!homepageState.perAgent) return [];
+  return Object.entries(homepageState.perAgent).map(([agentName, agentState]) => ({
+    params: { agentSlug: agentName },
+    props: { agentState: agentState as PerAgentState },
+  }));
+}
+
+const { agentState } = Astro.props as { agentState: PerAgentState };
+const agentSlug = Astro.params.agentSlug;
+
+/** Format a raw decimal string as a USD display string ($1,234.50) matching formatUsd in MetricStrip. */
+function formatUsd(raw: string | null): string {
+  if (raw === null) return '$—';
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return '$—';
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+}
+
+// Entries attributed to this agent, newest-first. Older entries lack `agentSlug` and are
+// correctly absent from this filtered view (AC2 — graceful empty state).
+// When DB id != public slug (publish skill sets agentState.publicSlug), match by publicSlug;
+// otherwise fall back to the route param (agentName used as key by getStaticPaths).
+const entrySlugFilter = agentState.publicSlug ?? agentSlug;
+const entries = await getCollection('ledger');
+const agentEntries = entries
+  .filter((entry) => entry.data.agentSlug === entrySlugFilter)
+  .sort((a, b) => {
+    const byDate = b.data.date.localeCompare(a.data.date);
+    return byDate !== 0 ? byDate : b.slug.localeCompare(a.slug);
+  });
+
+// The public wallet, if known — taken from the agent's most recent attributed entry. The
+// per-agent aggregate does not carry a wallet field, so we source it from the entry frontmatter
+// (already public on-chain). Omit the wallet line entirely when no attributed entry exists.
+const wallet = agentEntries[0]?.data.wallet ?? null;
+const explorerUrl = wallet ? `https://basescan.org/address/${wallet}` : undefined;
+
+// Story 75.7 (AC2) — embed a relevant dashboard screenshot where it illustrates the story:
+// prefer the 'portfolio' view, fall back to 'home', else nothing. Absent shot → agentShots is []
+// → ScreenshotGallery renders nothing (graceful degradation, AC2).
+const allScreenshots = screenshotsRaw as ScreenshotManifestEntry[];
+const agentShot =
+  allScreenshots.find((shot) => shot.viewId === 'portfolio') ??
+  allScreenshots.find((shot) => shot.viewId === 'home') ??
+  null;
+const agentShots = agentShot ? [agentShot] : [];
+---
+
+<BaseLayout
+  title={`${agentState.agentName} — Aegentic Ledger`}
+  wallet={wallet ?? undefined}
+  explorerUrl={explorerUrl}
+  explorerName={wallet ? 'view on basescan' : undefined}
+>
+  <header class="agent-head">
+    <p class="eyebrow">AGENT LEDGER</p>
+    <h1>{agentState.agentName}</h1>
+    {
+      wallet && (
+        <p class="wallet">
+          <span class="wallet-label">public wallet</span>
+          <a class="wallet-addr mono" href={explorerUrl}>
+            {wallet}
+          </a>
+        </p>
+      )
+    }
+  </header>
+
+  <MetricStrip
+    cyclesSupervised={agentState.cyclesSupervised}
+    selfCustodiedCapital={agentState.selfCustodiedCapital}
+    movesBlocked={agentState.movesBlocked}
+    drained={agentState.drained}
+    generatedAt={s.generatedAt}
+  />
+
+  {/* Story 75.7 (AC2) — the product visual between the metric summary and the positions table. */}
+  <ScreenshotGallery shots={agentShots} />
+
+  <section class="positions" aria-label="Current positions">
+    <h2 class="section-title">Current positions</h2>
+    {
+      agentState.currentPositions.length === 0 ? (
+        <p class="empty">No open positions.</p>
+      ) : (
+        <table class="positions-table">
+          <thead>
+            <tr>
+              <th>Protocol</th>
+              <th>Token</th>
+              <th class="num">USD value</th>
+            </tr>
+          </thead>
+          <tbody>
+            {agentState.currentPositions.map((pos) => (
+              <tr>
+                <td>{pos.protocol}</td>
+                <td>{pos.symbol ?? pos.token}</td>
+                <td class="num mono">{formatUsd(pos.positionUsd)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )
+    }
+  </section>
+
+  <section class="agent-entries" aria-label="Latest entries">
+    <h2 class="section-title">Latest entries</h2>
+    {
+      agentEntries.length === 0 ? (
+        <p class="empty">No attributed entries yet.</p>
+      ) : (
+        <ol class="entry-list">
+          {agentEntries.map((entry) => (
+            <li>
+              <EntryCard
+                title={entry.data.title}
+                date={entry.data.date}
+                stream={entry.data.stream}
+                slug={entry.slug}
+                agentSlug={entry.data.agentSlug}
+              />
+            </li>
+          ))}
+        </ol>
+      )
+    }
+  </section>
+
+  <p class="back">
+    <a href="/">← All agents</a>
+  </p>
+</BaseLayout>
+
+<style>
+  .agent-head {
+    max-width: var(--entry-max);
+    margin: var(--stack) 0 var(--section-gap-mobile);
+  }
+
+  .eyebrow {
+    font-family: var(--font-body);
+    font-size: var(--label-caps-size);
+    font-weight: var(--label-caps-weight);
+    letter-spacing: var(--label-caps-ls);
+    color: var(--brand);
+    margin: 0 0 var(--stack-tight);
+  }
+
+  .agent-head h1 {
+    font-family: var(--font-display);
+    font-size: var(--display-lg-size);
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .wallet {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--stack-tight);
+    margin: var(--stack) 0 0;
+  }
+
+  .wallet-label {
+    font-family: var(--font-body);
+    font-size: var(--label-caps-size);
+    font-weight: var(--label-caps-weight);
+    letter-spacing: var(--label-caps-ls);
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .wallet-addr {
+    font-family: var(--font-mono);
+    font-size: var(--mono-sm-size);
+    color: var(--ink-secondary);
+    word-break: break-all;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--headline-size);
+    font-weight: 500;
+    color: var(--ink-primary);
+    margin: 0 0 var(--stack);
+  }
+
+  .positions,
+  .agent-entries {
+    margin: var(--section-gap-mobile) 0 0;
+    max-width: var(--entry-max);
+  }
+
+  .positions-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-body);
+    font-size: var(--body-sm-size);
+  }
+
+  .positions-table th,
+  .positions-table td {
+    text-align: left;
+    padding: var(--stack-tight) var(--gutter) var(--stack-tight) 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .positions-table th {
+    font-size: var(--label-caps-size);
+    font-weight: var(--label-caps-weight);
+    letter-spacing: var(--label-caps-ls);
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .positions-table .num {
+    text-align: right;
+  }
+
+  .positions-table td {
+    color: var(--ink-secondary);
+  }
+
+  .entry-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .empty {
+    color: var(--ink-muted);
+  }
+
+  .back {
+    margin: var(--section-gap-mobile) 0 0;
+  }
+
+  .back a {
+    font-family: var(--font-body);
+    font-size: var(--label-caps-size);
+    font-weight: var(--label-caps-weight);
+    letter-spacing: var(--label-caps-ls);
+    color: var(--brand);
+    text-decoration: none;
+  }
+</style>

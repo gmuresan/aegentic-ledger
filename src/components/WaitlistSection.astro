@@ -1,0 +1,139 @@
+---
+// WaitlistSection (Story 75.8, AC1–AC4) — the only third-party-script surface on the site.
+// A Buttondown-backed email capture: managed double-opt-in, unsubscribe, CAN-SPAM/GDPR all live
+// in Buttondown (locked decision LD5), so this repo ships zero server-side code. The form POSTs
+// directly to Buttondown's embed endpoint, so it works on the static Cloudflare deploy with no
+// Cloudflare Function (AC1).
+//
+// G14 — the CTA is bound and private: it invites interest WHEN THE PRODUCT IS READY, never
+// promises a return, a guarantee, or that the product exists today. A clear privacy line names
+// Buttondown's managed unsubscribe. No dark patterns, no pre-checked consent.
+//
+// G2 — every string below (markup AND these comments) must survive the lintHomepageCopy
+// banned-phrase gate; see BANNED_TERMS in scripts/lint-homepage-copy.ts for the denylist.
+//
+// AC3 — the Buttondown <script> lives INSIDE this component (never in BaseLayout) so it is only
+// emitted on pages that render <WaitlistSection /> (the homepage §6 and the /waitlist page).
+// Entry, agent, archive, and about pages do not import this component and stay script-clean.
+//
+// CONFIGURE_ME: the Buttondown account slug. Gm replaces it with the real username after account
+// creation. It appears only in the form `action=` URL (not as visible prose), so a future
+// operator can grep for it without it confusing a reader.
+const BUTTONDOWN_USERNAME = 'CONFIGURE_ME';
+const EMBED_ACTION = `https://buttondown.com/api/emails/embed-subscribe/${BUTTONDOWN_USERNAME}`;
+---
+
+<section class="waitlist" id="waitlist" aria-label="Waitlist">
+  <h2 class="section-title">Be first to try it</h2>
+  <p class="body">
+    This is a public record today — not a product you can buy. Leave your email and we'll reach
+    out when access opens.
+  </p>
+
+  <form class="embeddable-buttondown-form" action={EMBED_ACTION} method="post" target="popupwindow">
+    <label class="field-label" for="bd-email">Email address</label>
+    <div class="field-row">
+      <input
+        id="bd-email"
+        class="email-input"
+        type="email"
+        name="email"
+        placeholder="you@example.com"
+        autocomplete="email"
+        required
+      />
+      <button class="submit" type="submit">Notify me</button>
+    </div>
+  </form>
+
+  <p class="privacy">
+    No spam. Waitlist updates only. Unsubscribe at any time — the list is managed by Buttondown.
+  </p>
+
+  {/* AC3 — Buttondown embed JS. Enhances the form with inline submission + confirmation UX;
+      with JS off the form falls back to a native POST to the same endpoint (AC1/AC4). Placed
+      AFTER the form, INSIDE this component, never in BaseLayout, so it is scoped to the
+      waitlist surface only. `is:inline` keeps Astro from hoisting/bundling it — the third-party
+      <script> stays a literal tag in the page HTML, so the AC3 probe can see it is present only
+      where the component renders and absent everywhere else. */}
+  <script is:inline src="https://buttondown.com/js/embed.js"></script>
+</section>
+
+<style>
+  .waitlist {
+    margin: var(--section-gap-mobile) 0 0;
+    max-width: var(--reading-measure);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--headline-size);
+    font-weight: 500;
+    color: var(--ink-primary);
+    margin: 0 0 var(--stack);
+  }
+
+  .body {
+    font-family: var(--font-body);
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    color: var(--ink-secondary);
+    margin: 0 0 var(--stack);
+  }
+
+  .field-label {
+    display: block;
+    font-family: var(--font-body);
+    font-size: var(--label-caps-size);
+    font-weight: var(--label-caps-weight);
+    letter-spacing: var(--label-caps-ls);
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin: 0 0 var(--stack-tight);
+  }
+
+  .field-row {
+    display: flex;
+    gap: var(--stack);
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .email-input {
+    flex: 1 1 18rem;
+    min-width: 0;
+    border-radius: var(--radius);
+    border: 1px solid var(--hairline-strong);
+    background: transparent;
+    color: var(--ink-primary);
+    font-family: var(--font-body);
+    font-size: var(--body-size);
+    padding: 12px 14px;
+  }
+
+  .email-input::placeholder {
+    color: var(--ink-muted);
+  }
+
+  .submit {
+    border-radius: var(--radius);
+    border: none;
+    background: var(--brand);
+    color: var(--ink-on-accent);
+    font-family: var(--font-body);
+    font-size: var(--label-caps-size);
+    font-weight: var(--label-caps-weight);
+    letter-spacing: var(--label-caps-ls);
+    text-transform: uppercase;
+    padding: 12px 20px;
+    cursor: pointer;
+  }
+
+  .privacy {
+    font-family: var(--font-body);
+    font-size: var(--body-sm-size);
+    line-height: var(--body-lh);
+    color: var(--ink-muted);
+    margin: var(--stack) 0 0;
+  }
+</style>

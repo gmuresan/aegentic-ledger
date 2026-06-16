@@ -15,16 +15,36 @@ import MetricStrip from '../components/MetricStrip.astro';
 import HowItWorksSection from '../components/HowItWorksSection.astro';
 import SafetyLayerSection from '../components/SafetyLayerSection.astro';
 import LatestEntriesSection from '../components/LatestEntriesSection.astro';
+import FleetRosterSection from '../components/FleetRosterSection.astro';
+import ScreenshotGallery from '../components/ScreenshotGallery.astro';
+import WaitlistSection from '../components/WaitlistSection.astro';
 import state from '../data/state.json';
+import screenshotsRaw from '../data/screenshots.json';
 import type { HomepageState } from '../lib/state-types';
+import type { ScreenshotManifestEntry } from '../lib/screenshot-types';
 
 // state.json is the build-shape contract #3 aggregate; type it for the widgets (G1/G7).
 const s = state as HomepageState;
+
+// Story 75.5 (AC1/AC4): when the aggregate carries a fleet roll-up AND at least one agent,
+// the homepage leads with the fleet — the MetricStrip shows the fleet figures and the
+// FleetRosterSection renders below it. Absent fleet/perAgent → the existing single-agent
+// layout is unchanged (AC4 honest fleet-of-one). `metricsToShow` is the fleet roll-up when
+// present, else the top-level single-agent figures; both share the MetricStrip field shape.
+const hasFleet = s.fleet != null && s.perAgent != null && Object.keys(s.perAgent).length > 0;
+const metricsToShow = hasFleet ? s.fleet! : s;
 
 // The agent's public wallet, surfaced in the footer verify block (already public on-chain).
 const WALLET = '0x326e18Ade6Edc700F765F0906B5C5f05FF51F753';
 const EXPLORER_URL = `https://basescan.org/address/${WALLET}`;
 const EXPLORER_NAME = 'view on basescan';
+
+// Story 75.7 (AC1) — surface the current dashboard screenshot beneath the CTA (G10 — proof under
+// the pitch). Prefer the 'home' view; fall back to the first manifest entry. Empty manifest →
+// heroShots is [] → ScreenshotGallery renders nothing (graceful degradation, AC1/AC2).
+const screenshots = screenshotsRaw as ScreenshotManifestEntry[];
+const homeShot = screenshots.find((shot) => shot.viewId === 'home') ?? screenshots[0] ?? null;
+const heroShots = homeShot ? [homeShot] : [];
 ---
 
 <BaseLayout
@@ -37,23 +57,37 @@ const EXPLORER_NAME = 'view on basescan';
   <section class="hero">
     <p class="eyebrow">AEGENTIC LEDGER</p>
     <h1>Know exactly what an AI does with real money — before you trust one with yours.</h1>
-    <p class="lede">
-      An autonomous agent runs live capital on-chain under a supervised safety layer. Every
-      action it takes, and every move the rail blocks, is on the public record.
-    </p>
+    {
+      hasFleet ? (
+        <p class="lede">
+          An overseer supervises a fleet of autonomous agents running live capital on-chain under
+          a safety layer. Every action, and every move the rail blocks, is on the public record.
+        </p>
+      ) : (
+        <p class="lede">
+          An autonomous agent runs live capital on-chain under a supervised safety layer. Every
+          action it takes, and every move the rail blocks, is on the public record.
+        </p>
+      )
+    }
 
     <MetricStrip
-      cyclesSupervised={s.cyclesSupervised}
-      selfCustodiedCapital={s.selfCustodiedCapital}
-      movesBlocked={s.movesBlocked}
-      drained={s.drained}
+      cyclesSupervised={metricsToShow.cyclesSupervised}
+      selfCustodiedCapital={metricsToShow.selfCustodiedCapital}
+      movesBlocked={metricsToShow.movesBlocked}
+      drained={metricsToShow.drained}
       generatedAt={s.generatedAt}
     />
+
+    {hasFleet && <FleetRosterSection perAgent={s.perAgent!} />}
 
     <p class="cta">
       <a class="cta-button primary" href="/ledger">READ THE LEDGER</a>
       <a class="cta-button secondary" href="/feed.xml">RSS</a>
     </p>
+
+    {/* §1.5 Proof under the pitch (Story 75.7, G10) — the product the pitch describes. */}
+    <ScreenshotGallery shots={heroShots} />
   </section>
 
   {/* ── §2 How it works ───────────────────────────────────────────────── */}
@@ -79,6 +113,9 @@ const EXPLORER_NAME = 'view on basescan';
       outcomes.
     </p>
   </section>
+
+  {/* ── §6 Waitlist ──────────────────────────────────────────────────── */}
+  <WaitlistSection />
 </BaseLayout>
 
 <style>

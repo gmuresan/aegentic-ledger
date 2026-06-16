@@ -5,14 +5,16 @@
 //   stream-badge + <h1> title + date meta
 //   → above-fold callouts (slot "callouts")
 //   → editorial prose (slot "prose")
-//   → fact-wall separator (the deliberate gap + hairline-strong rule + surface drop)
-//   → <section class="fact-panel"> (slot "fact")
-//   → receipts (slot "receipts")
+//   → <details> "Receipts & reasoning" (Story 75.3) collapsing:
+//       → <section class="fact-panel"> (slot "fact")
+//       → receipts (slot "receipts")
 //
-// The fact-wall is a visual separator (role="separator", aria-hidden) — the fact
-// zone itself is the labeled landmark, supplied via the FactPanel component in the
-// "fact" slot (build-shape contract #6). This split is structural and build-time;
-// no client JS.
+// Story 75.3 demotes the evidence below the fold: the fact panel + receipts live
+// inside a collapsed native <details>, and its <summary> "Receipts & reasoning" is
+// now the visible facts↔commentary wall landmark (G1) — replacing the bare <hr>.
+// The fact zone itself remains the labeled landmark, supplied via the FactPanel
+// component in the "fact" slot (build-shape contract #6). The evidence is present
+// and complete, just demoted — never removed. Structural and build-time; no client JS.
 import BaseLayout from './BaseLayout.astro';
 import StreamBadge from '../components/StreamBadge.astro';
 
@@ -45,19 +47,28 @@ const displayDate = date.includes('T') ? date.slice(0, date.indexOf('T')) : date
       <slot name="callouts" />
     </div>
 
+    {/* Story 75.7 (AC2) — forward-seam for entry-level screenshot attribution. The slot is
+        wired but empty today ([slug].astro passes []) — :empty hides the zone so there is no
+        blank space until a future story populates it. */}
+    <div class="screenshot-zone">
+      <slot name="screenshot" />
+    </div>
+
     <div class="prose-zone">
       <slot name="prose" />
     </div>
 
-    <hr class="fact-wall" role="separator" aria-hidden="true" />
+    <details class="receipts-and-reasoning">
+      <summary class="fact-wall-summary">Receipts &amp; reasoning</summary>
 
-    <div class="fact-zone">
-      <slot name="fact" />
-    </div>
+      <div class="fact-zone">
+        <slot name="fact" />
+      </div>
 
-    <div class="receipts">
-      <slot name="receipts" />
-    </div>
+      <div class="receipts">
+        <slot name="receipts" />
+      </div>
+    </details>
   </article>
 
   <style>
@@ -89,6 +100,11 @@ const displayDate = date.includes('T') ? date.slice(0, date.indexOf('T')) : date
       margin: 0;
     }
 
+    /* Story 75.7: collapse the screenshot zone when its slot renders nothing (no blank gap). */
+    .screenshot-zone:empty {
+      display: none;
+    }
+
     /* Editorial prose: capped at the reading measure, set in body sans. */
     .prose-zone {
       max-width: var(--reading-measure);
@@ -103,11 +119,28 @@ const displayDate = date.includes('T') ? date.slice(0, date.indexOf('T')) : date
       font-family: var(--font-display);
     }
 
-    /* The fact-wall: the deliberate gap + a must-see rule + the surface drop below. */
-    .fact-wall {
-      border: none;
+    /* The facts↔commentary wall (G1): the <summary> is now the visible separator
+       landmark — the editorial prose sits above it, the evidence one click below.
+       The fact zone + receipts collapse into a native <details> (no client JS). */
+    .receipts-and-reasoning {
+      margin: var(--fact-wall-gap) 0 0;
+    }
+
+    .fact-wall-summary {
+      font-family: var(--font-body);
+      font-size: var(--label-caps-size);
+      font-weight: var(--label-caps-weight);
+      letter-spacing: var(--label-caps-ls);
+      color: var(--ink-muted);
+      cursor: pointer;
       border-top: 1px solid var(--hairline-strong);
-      margin: var(--fact-wall-gap) 0 var(--fact-wall-gap);
+      padding-top: var(--fact-wall-gap);
+      list-style: none; /* hide default disclosure triangle */
+    }
+
+    .fact-wall-summary::marker,
+    .fact-wall-summary::-webkit-details-marker {
+      display: none;
     }
 
     .receipts {

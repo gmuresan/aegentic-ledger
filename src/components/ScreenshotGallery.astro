@@ -1,0 +1,67 @@
+---
+// ScreenshotGallery (Story 75.7) — renders one or more clean dashboard screenshots from the
+// 75.6 capture manifest (src/data/screenshots.json) as <figure> elements with a deterministic
+// provenance caption. The caption is machine-generated from `captureDate` + `sourceBuild` — no
+// editorial adjective, no free text (G2/G11). When `shots` is empty the component renders nothing
+// (graceful degradation, AC2) — no broken <img>, no empty <figure>.
+//
+// This component only CONSUMES the already-gated manifest; the fail-closed redaction gate lives in
+// the capture script (75.6, G11). Static Astro only — no <script> block, no client JS.
+import type { ScreenshotManifestEntry } from '../lib/screenshot-types';
+
+interface Props {
+  shots: ScreenshotManifestEntry[];
+}
+const { shots } = Astro.props;
+---
+
+{
+  shots.length > 0 && (
+    <div class="screenshot-gallery">
+      {shots.map((shot) => {
+        const formattedDate = new Date(shot.captureDate).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          timeZone: 'UTC',
+        });
+        const caption = `Dashboard screenshot — as of ${formattedDate}, build ${shot.sourceBuild}`;
+        return (
+          <figure class="screenshot-figure">
+            <img
+              src={`/${shot.filePath}`}
+              alt={caption}
+              class="screenshot-img"
+              loading="lazy"
+              decoding="async"
+            />
+            <figcaption class="screenshot-caption">{caption}</figcaption>
+          </figure>
+        );
+      })}
+    </div>
+  )
+}
+
+<style>
+  .screenshot-gallery {
+    margin: var(--stack) 0 0;
+    max-width: var(--entry-max);
+  }
+  .screenshot-figure {
+    margin: 0;
+  }
+  .screenshot-img {
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--radius);
+    border: 1px solid var(--hairline);
+  }
+  .screenshot-caption {
+    font-family: var(--font-body);
+    font-size: var(--mono-sm-size);
+    color: var(--ink-muted);
+    margin-top: var(--stack-tight);
+    display: block;
+  }
+</style>
