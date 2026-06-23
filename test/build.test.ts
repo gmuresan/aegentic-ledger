@@ -348,6 +348,25 @@ describe('Two-stream surface (72.8)', () => {
   });
 });
 
+describe('Story 86.3 — verify page build probes', () => {
+  // COVERAGE-1 (Story 86.3, AC3): zero client JS on the verify page.
+  it('COVERAGE-1: dist/verify/index.html contains no <script element', () => {
+    const html = read('verify/index.html');
+    expect(html).not.toContain('<script');
+  });
+
+  // COVERAGE-2 (Story 86.3, AC2): the /verify link is present in every page footer.
+  it('COVERAGE-2: dist/index.html footer carries an href to /verify/', () => {
+    const html = read('index.html');
+    expect(html).toContain('href="/verify/"');
+  });
+
+  it('COVERAGE-2: dist/ledger/index.html footer carries an href to /verify/', () => {
+    const html = read('ledger/index.html');
+    expect(html).toContain('href="/verify/"');
+  });
+});
+
 describe('splitEntry — prose ↔ fact-panel split', () => {
   it('splits on the first lone --- thematic break', () => {
     const { prose, fact } = splitEntry('the prose line\n\n---\n\n## THE RECORD\n\nfact rows');

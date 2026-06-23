@@ -174,7 +174,7 @@ cast tx &lt;txHash&gt; --rpc-url https://mainnet.base.org</code></pre>
     <p>No extra tooling required — any machine with <code>curl</code> and <code>jq</code>:</p>
     <pre class="recipe"><code># Replace &lt;txHash&gt; with the hash from the manifest entry.
 curl -s -X POST https://mainnet.base.org \
-  -d '{"{"}\"jsonrpc\":\"2.0\",\"method\":\"eth_getTransactionByHash\",\"params\":[\"&lt;txHash&gt;\"],\"id\":1{"}"}' \
+  -d '&#123;"jsonrpc":"2.0","method":"eth_getTransactionByHash","params":["&lt;txHash&gt;"],"id":1&#125;' \
   -H 'Content-Type: application/json' \
   | jq '.result'</code></pre>
 
