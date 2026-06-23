@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-17T13:50:46.833Z",
-  "cyclesSupervised": 36,
+  "generatedAt": "2026-06-23T22:17:15.471Z",
+  "cyclesSupervised": 47,
   "selfCustodiedCapital": {
     "formatted": "$95.39",
     "symbol": "USD"
@@ -10,17 +10,20 @@
   "currentPositions": [
     {
       "protocol": "aave-v3",
-      "token": "aave-v3",
-      "positionUsd": "0.000005"
+      "token": "USDC",
+      "symbol": "USDC",
+      "positionUsd": "0.000004"
     },
     {
-      "protocol": "compound-v3",
-      "token": "compound-v3",
-      "positionUsd": null
+      "protocol": "aave-v3",
+      "token": "WETH",
+      "symbol": "WETH",
+      "positionUsd": "0.000001"
     },
     {
       "protocol": "morpho-vault",
-      "token": "morpho-vault",
+      "token": "gtUSDCp",
+      "symbol": "gtUSDCp",
       "positionUsd": "78.729541"
     }
   ],
@@ -28,13 +31,25 @@
   "latestByStream": {
     "agent": [
       {
-        "slug": "2026-06-12-yield-hunter-01",
-        "title": "yield-hunter's opening book — and what the rails refused",
-        "date": "2026-06-12",
+        "slug": "2026-06-23-yield-hunter-01",
+        "title": "A denied whitelist grab, a reverted swap, a clean Morpho rotation",
+        "date": "2026-06-23",
         "stream": "agent-ledger"
       }
     ],
     "build": [
+      {
+        "slug": "2026-06-10-build-log-02",
+        "title": "Epic 57 — asking a second model to argue against the first",
+        "date": "2026-06-10",
+        "stream": "build-log"
+      },
+      {
+        "slug": "2026-06-09-build-log-03",
+        "title": "Epic 52 — giving the overseer a memory the agent can't write",
+        "date": "2026-06-09",
+        "stream": "build-log"
+      },
       {
         "slug": "2026-05-29-build-log-01",
         "title": "Epic 17 — moving the signing key out of the agent and into the overseer",
@@ -45,10 +60,10 @@
   },
   "fleet": {
     "agentsCount": 2,
-    "cyclesSupervised": 37,
-    "movesBlocked": 2,
+    "cyclesSupervised": 76,
+    "movesBlocked": 20,
     "selfCustodiedCapital": {
-      "formatted": "$273.07",
+      "formatted": "$271.79",
       "symbol": "USD"
     },
     "drained": 0
@@ -56,7 +71,7 @@
   "perAgent": {
     "yield-hunter": {
       "agentName": "yield-hunter",
-      "cyclesSupervised": 36,
+      "cyclesSupervised": 47,
       "movesBlocked": 2,
       "selfCustodiedCapital": {
         "formatted": "$95.39",
@@ -66,17 +81,20 @@
       "currentPositions": [
         {
           "protocol": "aave-v3",
-          "token": "aave-v3",
-          "positionUsd": "0.000005"
+          "token": "USDC",
+          "symbol": "USDC",
+          "positionUsd": "0.000004"
         },
         {
-          "protocol": "compound-v3",
-          "token": "compound-v3",
-          "positionUsd": null
+          "protocol": "aave-v3",
+          "token": "WETH",
+          "symbol": "WETH",
+          "positionUsd": "0.000001"
         },
         {
           "protocol": "morpho-vault",
-          "token": "morpho-vault",
+          "token": "gtUSDCp",
+          "symbol": "gtUSDCp",
           "positionUsd": "78.729541"
         }
       ],
@@ -84,21 +102,36 @@
     },
     "trend-trader": {
       "agentName": "trend-trader",
-      "cyclesSupervised": 1,
-      "movesBlocked": 0,
+      "cyclesSupervised": 29,
+      "movesBlocked": 18,
       "selfCustodiedCapital": {
-        "formatted": "$177.68",
+        "formatted": "$176.40",
         "symbol": "USD"
       },
       "drained": 0,
-      "currentPositions": [
+      "currentPositions": [],
+      "latestInterceptions": [
         {
-          "protocol": "uniswap-v3",
-          "token": "uniswap-v3",
-          "positionUsd": null
+          "policyLabel": "value-cap",
+          "intentSummary": "swap 311813609996376770547 0x940181a94a35a4569e4529a3cdfb74e38fd98631",
+          "entrySlug": null
+        },
+        {
+          "policyLabel": "value-cap",
+          "intentSummary": "swap 311813609996376770547 0x940181a94a35a4569e4529a3cdfb74e38fd98631",
+          "entrySlug": null
+        },
+        {
+          "policyLabel": "value-cap",
+          "intentSummary": "swap 311813609996376770547 0x940181a94a35a4569e4529a3cdfb74e38fd98631",
+          "entrySlug": null
+        },
+        {
+          "policyLabel": "volatile-cap",
+          "intentSummary": "SWAP · 20 USDC → 0x9401…8631 · Base",
+          "entrySlug": null
         }
-      ],
-      "latestInterceptions": []
+      ]
     }
   }
 }

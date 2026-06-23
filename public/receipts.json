@@ -1,0 +1,52 @@
+[
+  {
+    "entrySlug": "2026-06-09-yield-hunter",
+    "operation": "deposit",
+    "protocol": "morpho-vault",
+    "amount": "78723843",
+    "amountFmt": "78.723",
+    "tokenDecimals": 6,
+    "txHash": "0x520ed3a56f15c715d26bdec18dba5c43694564755a17b0841679f359837e63f2",
+    "chainId": 8453
+  },
+  {
+    "entrySlug": "2026-06-09-yield-hunter",
+    "operation": "withdraw",
+    "protocol": "aave-v3",
+    "amount": "78723843",
+    "amountFmt": "78.723",
+    "tokenDecimals": 6,
+    "txHash": "0xd95279cb2ea9fc047515b6f46a4e3d756f40d008bae6c6f107f8fb659f5b8f99",
+    "chainId": 8453
+  },
+  {
+    "entrySlug": "2026-06-05-yield-hunter",
+    "operation": "deposit",
+    "protocol": "aave-v3",
+    "amount": "78696886",
+    "amountFmt": "78.696",
+    "tokenDecimals": 6,
+    "txHash": "0x3f892640fed96cedb6c01baa1ac2c6dd6235a874c610c01fa6639f2facc49e84",
+    "chainId": 8453
+  },
+  {
+    "entrySlug": "2026-06-05-yield-hunter",
+    "operation": "withdraw",
+    "protocol": "aave-v3",
+    "amount": "50000086920577786",
+    "amountFmt": "0.05",
+    "tokenDecimals": 18,
+    "txHash": "0x2b8a818f38da16da8c5f2ef53197acb37024917e6260cc8377e8896a0398b1d9",
+    "chainId": 8453
+  },
+  {
+    "entrySlug": "2026-06-05-yield-hunter",
+    "operation": "deposit",
+    "protocol": "aave-v3",
+    "amount": "50000000000000000",
+    "amountFmt": "0.05",
+    "tokenDecimals": 18,
+    "txHash": "0xa728f13dd3e92e5924081929a84fe225a3c5ede622dfe963679f7b2e5f58cddc",
+    "chainId": 8453
+  }
+]
