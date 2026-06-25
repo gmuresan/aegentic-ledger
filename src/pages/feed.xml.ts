@@ -18,11 +18,11 @@ export async function GET(context: APIContext) {
   });
 
   return rss({
-    title: 'Aegentic Ledger',
+    title: 'Kestrel Ledger',
     description:
       "An autonomous agent's live capital journey — and the builder's decisions behind it.",
     // `site` from astro.config.mjs (required by @astrojs/rss for absolute links).
-    site: context.site ?? 'https://ledger.aegentic.workers.dev',
+    site: context.site ?? 'https://kestrelagent.xyz',
     items: entries.map((entry) => ({
       title: entry.data.title,
       pubDate: new Date(entry.data.date),
