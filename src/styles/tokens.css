@@ -1,5 +1,5 @@
 /*
- * Aegentic Ledger design tokens + global utility classes.
+ * Kestrel Ledger design tokens + global utility classes.
  *
  * SINGLE SOURCE of the redesign's visual system. Imported once, globally, by
  * BaseLayout.astro. Component files consume the custom properties and utility
